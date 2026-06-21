@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的倒计时</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex-direction: column;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255,255,255,0.15);
+            padding: 50px 60px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .sub {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        .timer {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .box {
+            background: rgba(0,0,0,0.2);
+            padding: 20px 25px;
+            border-radius: 20px;
+            min-width: 80px;
+        }
+        .box span:first-child {
+            font-size: 3.5rem;
+            font-weight: bold;
+            display: block;
+        }
+        .label {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+        input {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            outline: none;
+            width: 200px;
+        }
+        button {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 30px;
+            background: #ff6b6b;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #ee5a24;
+            transform: scale(1.05);
+        }
+        .input-area {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⏳ 倒计时器</h1>
+        <p class="sub">距离目标日期还有</p >
+
+        <div class="input-area">
+            <input type="datetime-local" id="targetDate">
+            <button onclick="setTarget()">设定倒计时</button>
+        </div>
+
+        <div class="timer" id="timer">
+            <div class="box"><span id="days">00</span><div class="label">天</div></div>
+            <div class="box"><span id="hours">00</span><div class="label">时</div></div>
+            <div class="box"><span id="minutes">00</span><div class="label">分</div></div>
+            <div class="box"><span id="seconds">00</span><div class="label">秒</div></div>
+        </div>
+        <div class="footer" id="status">请设定一个未来的日期 🎯</div>
+    </div>
+
+    <script>
+        let targetTime = null;
+
+        function setTarget() {
+            const val = document.getElementById('targetDate').value;
+            if (!val) {
+                alert('请选择一个未来的日期和时间！');
+                return;
+            }
+            const d = new Date(val);
+            if (d <= new Date()) {
+                alert('请选择未来的时间！');
+                return;
+            }
+            targetTime = d.getTime();
+            document.getElementById('status').textContent = '⏰ 倒计时进行中...';
+        }
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            if (!targetTime || targetTime <= now) {
+                document.getElementById('days').textContent = '00';
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                if (targetTime && targetTime <= now) {
+                    document.getElementById('status').textContent = '🎉 时间到啦！';
+                }
+                return;
+            }
+
+            let diff = targetTime - now;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            diff -= days * 1000 * 60 * 60 * 24;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            diff -= hours * 1000 * 60 * 60;
+            const minutes = Math.floor(diff / (1000 * 60));
+            diff -= minutes * 1000 * 60;
+            const seconds = Math.floor(diff / 1000);
+
+            document.getElementById('days').textContent = String(days).padStart(2, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
+</body>
+</html>
