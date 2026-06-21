@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师节快乐</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: '华文楷体', 'KaiTi', 'Microsoft YaHei', serif;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 30%, #f48fb1 60%, #f06292 100%);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ===== 浮动花瓣 ===== */
+        .petal {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.5;
+            animation: floatPetals linear infinite;
+            pointer-events: none;
+            user-select: none;
+        }
+        @keyframes floatPetals {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0.6; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0.2; }
+        }
+
+        /* ===== 主卡片 ===== */
+        .card {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            padding: 50px 45px 40px;
+            border-radius: 60px 20px 60px 20px;
+            box-shadow: 0 30px 80px rgba(233, 30, 99, 0.25);
+            text-align: center;
+            max-width: 560px;
+            width: 90%;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            transition: 0.4s;
+        }
+        .card:hover {
+            transform: scale(1.01);
+            box-shadow: 0 40px 100px rgba(233, 30, 99, 0.35);
+        }
+
+        .card .icon {
+            font-size: 4.2rem;
+            margin-bottom: 6px;
+        }
+        .card h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #d81b60, #ad1457);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 6px;
+        }
+        .card .sub {
+            font-size: 1.15rem;
+            color: #6a1b3a;
+            margin: 12px 0 8px;
+            letter-spacing: 3px;
+            border-top: 2px dashed #f48fb1;
+            padding-top: 16px;
+        }
+        .card .poem {
+            font-size: 1.3rem;
+            line-height: 2.2rem;
+            color: #4a1a2a;
+            margin: 18px 0 22px;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 20px 16px;
+            border-radius: 40px 8px 40px 8px;
+            font-style: italic;
+        }
+        .card .poem span {
+            display: block;
+            font-size: 0.95rem;
+            color: #7a4a5a;
+            margin-top: 10px;
+            font-style: normal;
+            letter-spacing: 2px;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #ec407a, #d81b60);
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 8px 24px rgba(233, 30, 99, 0.4);
+            letter-spacing: 2px;
+            font-family: inherit;
+        }
+        .btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 14px 36px rgba(233, 30, 99, 0.5);
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ===== 惊喜彩蛋 ===== */
+        .surprise {
+            margin-top: 24px;
+            font-size: 1.8rem;
+            min-height: 3.6rem;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            color: #880e4f;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .surprise.show {
+            opacity: 1;
+        }
+
+        .footer-note {
+            margin-top: 22px;
+            font-size: 0.9rem;
+            color: #8a4a5a;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 480px) {
+            .card { padding: 30px 18px; }
+            .card h1 { font-size: 2.0rem; }
+            .card .poem { font-size: 1.0rem; line-height: 1.8rem; }
+            .btn { font-size: 1.0rem; padding: 12px 28px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 浮动花瓣（JS 生成） ===== -->
+    <div id="petalsContainer"></div>
+
+    <!-- ===== 主卡片 ===== -->
+    <div class="card">
+        <div class="icon">🌹</div>
+        <h1>教师节快乐</h1>
+        <div class="sub">—— 桃李满天下 · 春晖遍四方 ——</div>
+
+        <div class="poem">
+            “ 三尺讲台，三寸舌，三寸笔，三千桃李 ”
+            <span>—— 致敬每一位辛勤的园丁</span>
+        </div>
+
+        <button class="btn" onclick="showSurprise()">🌸 点击送祝福</button>
+
+        <div class="surprise" id="surpriseMessage">💐 老师，您辛苦了！</div>
+        <div class="footer-note">✨ 教诲如春风 · 师恩似海深 ✨</div>
+    </div>
+
+    <script>
+        // ===== 生成浮动花瓣 =====
+        function createPetals() {
+            const container = document.getElementById('petalsContainer');
+            const emojis = ['🌸', '🌺', '🌷', '🌹', '🌻', '🌸'];
+            for (let i = 0; i < 28; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.textContent = emojis[i % emojis.length];
+                const size = 1.2 + Math.random() * 2.0;
+                petal.style.fontSize = size + 'rem';
+                petal.style.left = Math.random() * 98 + '%';
+                petal.style.animationDuration = (8 + Math.random() * 14) + 's';
+                petal.style.animationDelay = (Math.random() * 16) + 's';
+                petal.style.opacity = 0.25 + Math.random() * 0.5;
+                container.appendChild(petal);
+            }
+        }
+        createPetals();
+
+        // ===== 点击惊喜 =====
+        function showSurprise() {
+            const el = document.getElementById('surpriseMessage');
+            const messages = [
+                '💐 老师，您辛苦了！',
+                '🌟 您是我们心中的明灯！',
+                '📚 感谢您的谆谆教诲！',
+                '🌹 愿您永远健康快乐！',
+                '🏆 您是最美的园丁！',
+                '💖 师恩如山，永记心间！'
+            ];
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            el.textContent = randomMsg;
+            el.classList.add('show');
+
+            // 再触发一次轻微震动效果
+            const card = document.querySelector('.card');
+            card.style.transition = '0.1s';
+            card.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                card.style.transform = 'scale(1)';
+            }, 120);
+        }
+    </script>
+</body>
+</html>
