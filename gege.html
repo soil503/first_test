@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>格格 · 考研加油</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background: #f7f3ee;
+            padding: 20px;
+            transition: background 0.5s, color 0.5s;
+        }
+
+        body.dark {
+            background: #1a1a26;
+            color: #d0d0e0;
+        }
+        body.dark .card {
+            background: #26263a;
+            border-color: #3a3a56;
+        }
+        body.dark .card h1 { color: #c4b5d4; }
+        body.dark .greeting { color: #8888aa; }
+        body.dark .quote-text { color: #d0d0e8; }
+        body.dark .quote-author { color: #8888aa; }
+        body.dark .task-item {
+            background: #32324a;
+            border-color: #444466;
+            color: #d0d0e0;
+        }
+        body.dark .task-item.done {
+            background: #2a3a3a;
+            border-color: #4a7a6a;
+            color: #8ab4a8;
+        }
+        body.dark .task-item.done .task-label { color: #8ab4a8; }
+        body.dark .btn-quote {
+            color: #8888aa;
+            border-color: #444466;
+        }
+        body.dark .btn-quote:hover {
+            background: #32324a;
+            border-color: #7a6aaa;
+            color: #c4b5d4;
+        }
+        body.dark .btn-secondary {
+            background: #32324a;
+            color: #a0a0c0;
+        }
+        body.dark .btn-secondary:hover { background: #42425a; }
+        body.dark .footer { color: #666688; border-color: #33334a; }
+        body.dark .letter-content { background: #2a2a40; }
+        body.dark .btn-letter {
+            background: #3a3a56;
+            color: #c0c0d8;
+        }
+        body.dark .btn-letter:hover { background: #4a4a6a; }
+        body.dark .divider { background: #3a3a56; }
+
+        .card {
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 44px 38px 36px;
+            max-width: 540px;
+            width: 100%;
+            border: 1px solid #e8e0d8;
+            box-shadow: 0 16px 60px rgba(0,0,0,0.06);
+            transition: background 0.5s, border-color 0.5s;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .greeting {
+            font-size: 0.9rem;
+            color: #b0a098;
+            letter-spacing: 4px;
+            margin-bottom: 4px;
+        }
+        .card h1 {
+            font-size: 2.4rem;
+            font-weight: 600;
+            color: #3a2a2a;
+            letter-spacing: 6px;
+        }
+        .card h1 span { color: #b87a5a; }
+
+        .divider {
+            width: 40px;
+            height: 2px;
+            background: #e8e0d8;
+            margin: 18px auto 20px;
+            border-radius: 2px;
+            transition: background 0.5s;
+        }
+
+        .quote-section {
+            text-align: center;
+            padding: 8px 0 4px;
+        }
+        .quote-text {
+            font-size: 1.2rem;
+            line-height: 2rem;
+            color: #4a3a3a;
+            font-weight: 400;
+            min-height: 4.4rem;
+            transition: opacity 0.4s;
+            padding: 0 4px;
+        }
+        .quote-text.fade { opacity: 0; }
+        .quote-author {
+            font-size: 0.85rem;
+            color: #b0a098;
+            margin-top: 6px;
+            letter-spacing: 2px;
+        }
+        .btn-quote {
+            background: none;
+            border: 1px solid #ddd6ce;
+            border-radius: 30px;
+            padding: 6px 24px;
+            font-size: 0.8rem;
+            color: #a09088;
+            cursor: pointer;
+            transition: 0.25s;
+            margin-top: 12px;
+            font-family: inherit;
+            letter-spacing: 2px;
+        }
+        .btn-quote:hover {
+            background: #f5f0eb;
+            border-color: #b87a5a;
+            color: #b87a5a;
+        }
+
+        .divider-light {
+            width: 100%;
+            height: 1px;
+            background: #f0e8e2;
+            margin: 22px 0;
+            transition: background 0.5s;
+        }
+
+        .task-section { margin: 6px 0 10px; }
+        .task-label-title {
+            font-size: 0.85rem;
+            color: #b0a098;
+            letter-spacing: 3px;
+            margin-bottom: 14px;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            background: #faf8f6;
+            border-radius: 16px;
+            border: 1px solid #eee6e0;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.95rem;
+            color: #3a3a3a;
+            margin-bottom: 10px;
+        }
+        .task-item:hover { border-color: #c0b0a8; }
+        .task-item .circle {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid #d0c8c0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: 0.3s;
+            font-size: 0.7rem;
+            color: transparent;
+        }
+        .task-item.done .circle {
+            background: #b87a5a;
+            border-color: #b87a5a;
+            color: #fff;
+        }
+        .task-item .task-label { flex: 1; transition: 0.3s; }
+        .task-item.done .task-label {
+            text-decoration: line-through;
+            color: #b0a098;
+        }
+        .task-item.done { background: #f5f5f0; border-color: #d0d0c8; }
+        .btn-reset {
+            background: none;
+            border: none;
+            color: #c0b0a8;
+            font-size: 0.75rem;
+            cursor: pointer;
+            padding: 6px 0 0;
+            letter-spacing: 2px;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .btn-reset:hover { color: #b87a5a; }
+
+        .letter-section { margin-top: 10px; }
+        .btn-letter {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 20px;
+            background: #f5f0eb;
+            color: #5a4a42;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: inherit;
+            letter-spacing: 3px;
+        }
+        .btn-letter:hover { background: #eee6e0; }
+        .letter-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s ease, padding 0.4s, opacity 0.4s;
+            opacity: 0;
+            padding: 0 6px;
+            background: #faf8f6;
+            border-radius: 16px;
+            margin-top: 0;
+        }
+        .letter-content.open {
+            max-height: 400px;
+            opacity: 1;
+            padding: 20px 20px;
+            margin-top: 14px;
+        }
+        .letter-content p {
+            font-size: 0.95rem;
+            line-height: 1.9rem;
+            color: #4a3a3a;
+            letter-spacing: 1px;
+        }
+        .letter-content .sign {
+            text-align: right;
+            margin-top: 10px;
+            color: #b0a098;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #ccc4be;
+            letter-spacing: 2px;
+            margin-top: 26px;
+            padding-top: 18px;
+            border-top: 1px solid #f0e8e2;
+            transition: color 0.5s, border-color 0.5s;
+        }
+        .btn-secondary {
+            background: #f5f0eb;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 24px;
+            font-size: 0.8rem;
+            color: #a09088;
+            cursor: pointer;
+            transition: 0.25s;
+            font-family: inherit;
+            letter-spacing: 2px;
+            margin-top: 8px;
+        }
+        .btn-secondary:hover {
+            background: #eee6e0;
+            color: #7a6a62;
+        }
+
+        @media (max-width: 480px) {
+            .card { padding: 28px 16px; }
+            .card h1 { font-size: 1.8rem; }
+            .quote-text { font-size: 1.05rem; line-height: 1.8rem; }
+            .task-item { font-size: 0.85rem; padding: 10px 14px; }
+            .letter-content p { font-size: 0.9rem; line-height: 1.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <!-- 头部 -->
+    <div class="card-header">
+        <div class="greeting">✦ 给 格 格 ✦</div>
+        <h1>考研 · <span>加油</span></h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 每日一句 -->
+    <div class="quote-section">
+        <div class="quote-text" id="quoteText">所有的坚持，都会在未来的某一天闪闪发光。</div>
+        <div class="quote-author" id="quoteAuthor">—— 佚名</div>
+        <button class="btn-quote" onclick="refreshQuote()">换一句</button>
+    </div>
+
+    <div class="divider-light"></div>
+
+    <!-- 今日小确幸 -->
+    <div class="task-section">
+        <div class="task-label-title">☀️ 今日小确幸</div>
+        <div class="task-item" onclick="toggleTask(this)">
+            <span class="circle">✓</span>
+            <span class="task-label">今天有好好吃饭</span>
+        </div>
+        <div class="task-item" onclick="toggleTask(this)">
+            <span class="circle">✓</span>
+            <span class="task-label">今天有认真复习</span>
+        </div>
+        <div class="task-item" onclick="toggleTask(this)">
+            <span class="circle">✓</span>
+            <span class="task-label">今天有给自己一个微笑</span>
+        </div>
+        <button class="btn-reset" onclick="resetTasks()">↻ 重置</button>
+    </div>
+
+    <div class="divider-light"></div>
+
+    <!-- 一封信 -->
+    <div class="letter-section">
+        <button class="btn-letter" onclick="toggleLetter()">💌 点开 · 给你的信</button>
+        <div class="letter-content" id="letterContent">
+            <p>
+                格格，<br><br>
+                你背的每一个单词，做的每一道题，熬的每一个夜，<br>
+                都在悄悄把你推向那个想去的地方。<br><br>
+                你不用完美，也不用和别人比。<br>
+                只要今天比昨天多懂一点点，就已经很棒了。<br><br>
+                累了就休息，饿了就吃饭，<br>
+                你的身体和心情，比任何一张试卷都重要。<br><br>
+                你值得所有的好结果。<br>
+                不管最后去哪里，你都是那个闪闪发光的格格。<br><br>
+                加油，小格格！
+            </p >
+            <div class="sign">—— 你的朋友</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>✨ 你比你想象的更勇敢 ✨</div>
+        <button class="btn-secondary" onclick="toggleDarkMode()">🌙 夜间模式</button>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 1. 每日一句（温暖语录）
+    // ============================================================
+    const quotes = [
+        { text: '所有的坚持，都会在未来的某一天闪闪发光。', author: '佚名' },
+        { text: '你比你想象的更有力量。', author: '佚名' },
+        { text: '每一步都算数，每一刻都值得。', author: '佚名' },
+        { text: '你不用很厉害才能开始，但你必须开始才能很厉害。', author: '佚名' },
+        { text: '今天也是值得努力的一天呀。', author: '佚名' },
+        { text: '慢慢来，比较快。', author: '蒋勋' },
+        { text: '你认真起来的样子，真的很好看。', author: '佚名' },
+        { text: '所有的遗憾，都是为了更好的遇见。', author: '佚名' },
+        { text: '你配得上所有的美好。', author: '佚名' },
+        { text: '别怕，天总会亮的。', author: '佚名' },
+        { text: '你的坚持，终将美好。', author: '佚名' },
+        { text: '半山腰太挤，我们山顶见。', author: '佚名' },
+        { text: '你本身就是一束光。', author: '佚名' },
+        { text: '今天也要好好爱自己。', author: '佚名' },
+        { text: '格格加油，你一定能上岸。', author: '所有人' }
+    ];
+
+    let currentIdx = -1;
+
+    function refreshQuote() {
+        const el = document.getElementById('quoteText');
+        const auth = document.getElementById('quoteAuthor');
+        el.classList.add('fade');
+        setTimeout(() => {
+            let idx;
+            do { idx = Math.floor(Math.random() * quotes.length); } 
+            while (idx === currentIdx && quotes.length > 1);
+            currentIdx = idx;
+            el.textContent = quotes[idx].text;
+            auth.textContent = '—— ' + quotes[idx].author;
+            el.classList.remove('fade');
+        }, 300);
+    }
+
+    (function init() {
+        const idx = Math.floor(Math.random() * quotes.length);
+        currentIdx = idx;
+        document.getElementById('quoteText').textContent = quotes[idx].text;
+        document.getElementById('quoteAuthor').textContent = '—— ' + quotes[idx].author;
+    })();
+
+    // ============================================================
+    // 2. 任务打卡（本地存储）
+    // ============================================================
+    const KEY = 'gege_tasks';
+
+    function loadTasks() {
+        const saved = localStorage.getItem(KEY);
+        if (saved) {
+            const states = JSON.parse(saved);
+            document.querySelectorAll('.task-item').forEach((el, i) => {
+                if (states[i]) el.classList.add('done');
+                else el.classList.remove('done');
+            });
+        }
+    }
+
+    function saveTasks() {
+        const states = Array.from(document.querySelectorAll('.task-item'))
+            .map(el => el.classList.contains('done'));
+        localStorage.setItem(KEY, JSON.stringify(states));
+    }
+
+    function toggleTask(el) {
+        el.classList.toggle('done');
+        saveTasks();
+    }
+
+    function resetTasks() {
+        if (!confirm('重置所有任务吗？')) return;
+        document.querySelectorAll('.task-item').forEach(el => el.classList.remove('done'));
+        saveTasks();
+    }
+
+    loadTasks();
+
+    // ============================================================
+    // 3. 展开信
+    // ============================================================
+    let letterOpen = false;
+
+    function toggleLetter() {
+        const el = document.getElementById('letterContent');
+        letterOpen = !letterOpen;
+        el.classList.toggle('open', letterOpen);
+        document.querySelector('.btn-letter').textContent = letterOpen ? '📕 收起信' : '💌 点开 · 给你的信';
+    }
+
+    // ============================================================
+    // 4. 夜间模式
+    // ============================================================
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark');
+        const btn = document.querySelector('.btn-secondary');
+        btn.textContent = document.body.classList.contains('dark') ? '☀️ 日间模式' : '🌙 夜间模式';
+        localStorage.setItem('gege_dark', document.body.classList.contains('dark') ? '1' : '0');
+    }
+
+    (function() {
+        const saved = localStorage.getItem('gege_dark');
+        if (saved === '1') {
+            document.body.classList.add('dark');
+            document.querySelector('.btn-secondary').textContent = '☀️ 日间模式';
+        }
+    })();
+</script>
+</body>
+</html>
