@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小胖二妮吃屁 🤡</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Comic Sans MS', '华文楷体', cursive, sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #ff9a9e 100%);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ===== 背景浮动屁屁 ===== */
+        .poop-emoji {
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.15;
+            animation: floatPoop linear infinite;
+            pointer-events: none;
+            user-select: none;
+        }
+        @keyframes floatPoop {
+            0% { transform: translateY(100vh) rotate(0deg) scale(1); }
+            100% { transform: translateY(-10vh) rotate(720deg) scale(1.5); }
+        }
+
+        /* ===== 主卡片 ===== */
+        .card {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 40px 35px 35px;
+            border-radius: 80px 20px 80px 20px;
+            box-shadow: 0 30px 80px rgba(200, 80, 50, 0.3);
+            text-align: center;
+            max-width: 520px;
+            width: 90%;
+            border: 4px dashed #ff6b35;
+            animation: shakeCard 3s ease-in-out infinite;
+        }
+        @keyframes shakeCard {
+            0%, 100% { transform: rotate(-1deg) scale(1); }
+            50% { transform: rotate(1deg) scale(1.02); }
+        }
+
+        .card .big-emoji {
+            font-size: 5rem;
+            display: block;
+            animation: bounceEmoji 1.2s ease-in-out infinite;
+        }
+        @keyframes bounceEmoji {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-18px); }
+        }
+
+        .card h1 {
+            font-size: 2.6rem;
+            color: #d63031;
+            margin: 10px 0 4px;
+            letter-spacing: 4px;
+            text-shadow: 2px 2px 0 #fdcb6e;
+        }
+        .card .sub {
+            font-size: 1.1rem;
+            color: #6c5ce7;
+            letter-spacing: 3px;
+            border-top: 3px dotted #fdcb6e;
+            padding-top: 14px;
+            margin-top: 6px;
+        }
+
+        .counter-box {
+            background: #2d3436;
+            color: #dfe6e9;
+            padding: 12px 20px;
+            border-radius: 50px;
+            margin: 18px 0 20px;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+        .counter-box span {
+            color: #fdcb6e;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 6px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.25s;
+            font-family: inherit;
+            letter-spacing: 2px;
+            flex: 1 1 auto;
+            min-width: 130px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #fd79a8, #e17055);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(225, 112, 85, 0.5);
+        }
+        .btn-primary:hover {
+            transform: scale(1.06) translateY(-3px);
+            box-shadow: 0 12px 32px rgba(225, 112, 85, 0.6);
+        }
+        .btn-primary:active {
+            transform: scale(0.94);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #fdcb6e, #f39c12);
+            color: #2d3436;
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+        }
+        .btn-danger:hover {
+            transform: scale(1.06) translateY(-3px);
+            box-shadow: 0 12px 32px rgba(243, 156, 18, 0.5);
+        }
+        .btn-danger:active {
+            transform: scale(0.94);
+        }
+
+        /* ===== 放屁特效文字 ===== */
+        .fart-effect {
+            margin-top: 18px;
+            font-size: 2.8rem;
+            min-height: 4.2rem;
+            font-weight: bold;
+            color: #e17055;
+            transition: all 0.2s;
+            letter-spacing: 4px;
+            word-break: break-all;
+        }
+        .fart-effect.pop {
+            animation: popText 0.4s ease;
+        }
+        @keyframes popText {
+            0% { transform: scale(0.2) rotate(-10deg); opacity: 0; }
+            60% { transform: scale(1.4) rotate(3deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #636e72;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+        .footer-note a {
+            color: #e17055;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 480px) {
+            .card { padding: 28px 16px; }
+            .card h1 { font-size: 1.8rem; }
+            .btn { font-size: 1.0rem; padding: 12px 16px; min-width: 100px; }
+            .counter-box { font-size: 1.0rem; }
+            .fart-effect { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 背景浮动表情 ===== -->
+    <div id="poopContainer"></div>
+
+    <!-- ===== 主卡片 ===== -->
+    <div class="card">
+        <span class="big-emoji">💨</span>
+        <h1>🤡 小胖二妮吃屁</h1>
+        <div class="sub">—— 点击下方按钮 · 收获快乐 ——</div>
+
+        <div class="counter-box">
+            💩 今日被整次数：<span id="countDisplay">0</span>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="fartAction()">💨 放个屁</button>
+            <button class="btn btn-danger" onclick="resetCount()">🔄 重置</button>
+        </div>
+
+        <div class="fart-effect" id="fartText">👀 点一下试试</div>
+        <div class="footer-note">⚠️ 仅供娱乐 · 请勿当真 · 小胖二妮纯属虚构</div>
+    </div>
+
+    <script>
+        let count = 0;
+
+        // ===== 背景浮动表情 =====
+        function createPoops() {
+            const container = document.getElementById('poopContainer');
+            const emojis = ['💩', '🦨', '💨', '🤡', '😈', '💨'];
+            for (let i = 0; i < 22; i++) {
+                const el = document.createElement('div');
+                el.className = 'poop-emoji';
+                el.textContent = emojis[i % emojis.length];
+                const size = 1.8 + Math.random() * 2.8;
+                el.style.fontSize = size + 'rem';
+                el.style.left = Math.random() * 96 + '%';
+                el.style.animationDuration = (10 + Math.random() * 18) + 's';
+                el.style.animationDelay = (Math.random() * 14) + 's';
+                el.style.opacity = 0.10 + Math.random() * 0.25;
+                container.appendChild(el);
+            }
+        }
+        createPoops();
+
+        // ===== 放屁动作 =====
+        function fartAction() {
+            count++;
+            document.getElementById('countDisplay').textContent = count;
+
+            const el = document.getElementById('fartText');
+            const phrases = [
+                '💨 噗～～～～～！',
+                '😤 臭气熏天！',
+                '🤢 二妮快跑！',
+                '💩 小胖又来了！',
+                '🌀 方圆十里都臭了！',
+                '😆 哈哈哈哈哈哈！',
+                '💨 连环屁！噗噗噗！',
+                '🤡 二妮表示不服！',
+                '🔥 这屁有火气！',
+                '🌈 七彩祥屁！'
+            ];
+            const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+            el.textContent = randomPhrase;
+            el.classList.remove('pop');
+            // 强制重触发动画
+            void el.offsetWidth;
+            el.classList.add('pop');
+
+            // 震动卡片
+            const card = document.querySelector('.card');
+            card.style.transition = '0.08s';
+            card.style.transform = 'rotate(-3deg) scale(1.03)';
+            setTimeout(() => {
+                card.style.transform = 'rotate(0deg) scale(1)';
+            }, 150);
+
+            // 每5次触发一次恶搞弹窗
+            if (count % 5 === 0 && count > 0) {
+                setTimeout(() => {
+                    alert('🤣 恭喜你！小胖二妮说：你被盯上了！');
+                }, 300);
+            }
+        }
+
+        // ===== 重置 =====
+        function resetCount() {
+            if (confirm('确定要重置计数器吗？小胖会伤心的 😢')) {
+                count = 0;
+                document.getElementById('countDisplay').textContent = count;
+                document.getElementById('fartText').textContent = '🔁 已重置，再来一次！';
+                const el = document.getElementById('fartText');
+                el.classList.remove('pop');
+                void el.offsetWidth;
+                el.classList.add('pop');
+            }
+        }
+    </script>
+</body>
+</html>
