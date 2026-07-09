@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎀 筝筝宝贝专属页面</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #fdf6f0 0%, #fce4ec 30%, #f8e8ff 60%, #e8f0fe 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ===== 背景漂浮小心心 ===== */
+        .floating-heart {
+            position: fixed;
+            font-size: 2rem;
+            opacity: 0.12;
+            pointer-events: none;
+            user-select: none;
+            animation: floatHeart linear infinite;
+        }
+        @keyframes floatHeart {
+            0% { transform: translateY(100vh) rotate(0deg) scale(0.8); opacity: 0.15; }
+            100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0.05; }
+        }
+
+        /* ===== 弹幕容器 ===== */
+        .danmaku-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .danmaku-item {
+            position: absolute;
+            white-space: nowrap;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e07090;
+            opacity: 0.7;
+            animation: danmakuMove linear infinite;
+            text-shadow: 0 0 20px rgba(255,200,220,0.5);
+            letter-spacing: 2px;
+        }
+        @keyframes danmakuMove {
+            0% { transform: translateX(100vw); opacity: 0.8; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(-100%); opacity: 0.2; }
+        }
+
+        /* ===== 主卡片 ===== */
+        .card {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(20px);
+            border-radius: 60px 20px 60px 20px;
+            padding: 42px 36px 36px;
+            max-width: 520px;
+            width: 100%;
+            border: 3px solid rgba(255, 182, 193, 0.5);
+            box-shadow: 0 30px 80px rgba(233, 30, 99, 0.12);
+            text-align: center;
+            animation: cardWiggle 4s ease-in-out infinite;
+        }
+        @keyframes cardWiggle {
+            0%, 100% { transform: rotate(-0.8deg) scale(1); }
+            50% { transform: rotate(0.8deg) scale(1.01); }
+        }
+
+        .card .big-emoji {
+            font-size: 4.8rem;
+            display: block;
+            animation: bounceBao 1.6s ease-in-out infinite;
+        }
+        @keyframes bounceBao {
+            0%, 100% { transform: translateY(0) rotate(-3deg); }
+            50% { transform: translateY(-14px) rotate(3deg); }
+        }
+
+        .card h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #e84393, #fd79a8, #fdcb6e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 4px;
+            margin: 6px 0 2px;
+        }
+        .card .sub {
+            font-size: 0.95rem;
+            color: #a08090;
+            letter-spacing: 4px;
+            border-top: 2px dashed #f8d0d8;
+            padding-top: 14px;
+            margin-top: 6px;
+        }
+
+        /* ===== 称号展示 ===== */
+        .title-display {
+            background: rgba(255, 200, 210, 0.25);
+            border-radius: 60px;
+            padding: 18px 16px;
+            margin: 18px 0 20px;
+            border: 2px dashed #f8b0c0;
+        }
+        .title-display .label {
+            font-size: 0.8rem;
+            color: #b090a0;
+            letter-spacing: 3px;
+        }
+        .title-display .title-text {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #d6336c;
+            letter-spacing: 6px;
+            min-height: 3.6rem;
+            transition: 0.3s;
+        }
+        .title-display .title-text.pop {
+            animation: titlePop 0.4s ease;
+        }
+        @keyframes titlePop {
+            0% { transform: scale(0.2) rotate(-10deg); opacity: 0; }
+            60% { transform: scale(1.3) rotate(3deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 6px 0 10px;
+        }
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 60px;
+            font-size: 1.0rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.25s;
+            font-family: inherit;
+            letter-spacing: 2px;
+            flex: 1 1 auto;
+            min-width: 110px;
+        }
+        .btn-pink {
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: #fff;
+            box-shadow: 0 6px 24px rgba(232, 67, 147, 0.35);
+        }
+        .btn-pink:hover {
+            transform: scale(1.06) translateY(-3px);
+            box-shadow: 0 12px 36px rgba(232, 67, 147, 0.45);
+        }
+        .btn-pink:active { transform: scale(0.94); }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #fdcb6e, #f39c12);
+            color: #2d3436;
+            box-shadow: 0 6px 24px rgba(243, 156, 18, 0.3);
+        }
+        .btn-gold:hover {
+            transform: scale(1.06) translateY(-3px);
+            box-shadow: 0 12px 36px rgba(243, 156, 18, 0.4);
+        }
+        .btn-gold:active { transform: scale(0.94); }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            color: #fff;
+            box-shadow: 0 6px 24px rgba(108, 92, 231, 0.3);
+        }
+        .btn-purple:hover {
+            transform: scale(1.06) translateY(-3px);
+            box-shadow: 0 12px 36px rgba(108, 92, 231, 0.4);
+        }
+        .btn-purple:active { transform: scale(0.94); }
+
+        /* ===== 计数器 ===== */
+        .counter-box {
+            background: #2d3436;
+            color: #dfe6e9;
+            padding: 10px 18px;
+            border-radius: 50px;
+            margin: 16px 0 18px;
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+            display: inline-block;
+        }
+        .counter-box span {
+            color: #fdcb6e;
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin: 0 4px;
+        }
+
+        /* ===== 夸夸弹幕按钮 ===== */
+        .praise-area {
+            margin-top: 6px;
+        }
+        .praise-text {
+            font-size: 1.3rem;
+            color: #d6336c;
+            min-height: 3rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+        .praise-text.pop {
+            animation: titlePop 0.4s ease;
+        }
+
+        .footer {
+            margin-top: 22px;
+            font-size: 0.8rem;
+            color: #b0a0a8;
+            letter-spacing: 2px;
+            border-top: 1px solid #f0e8e8;
+            padding-top: 16px;
+        }
+
+        /* ===== 撒花容器 ===== */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-10px) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg) scale(0.3); opacity: 0; }
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 480px) {
+            .card { padding: 28px 16px; }
+            .card h1 { font-size: 1.6rem; }
+            .title-display .title-text { font-size: 1.8rem; }
+            .btn { font-size: 0.85rem; padding: 10px 16px; min-width: 80px; }
+            .danmaku-item { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 背景浮动小心心 ===== -->
+    <div id="heartContainer"></div>
+
+    <!-- ===== 弹幕墙 ===== -->
+    <div class="danmaku-container" id="danmakuContainer"></div>
+
+    <!-- ===== 撒花容器 ===== -->
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <!-- ===== 主卡片 ===== -->
+    <div class="card">
+        <span class="big-emoji">🎀</span>
+        <h1>筝筝宝贝</h1>
+        <div class="sub">❤️ 全世界最可爱的小笨蛋 ❤️</div>
+
+        <!-- 称号展示 -->
+        <div class="title-display">
+            <div class="label">✨ 今日称号 ✨</div>
+            <div class="title-text" id="titleText">小肥筝</div>
+        </div>
+
+        <!-- 按钮区 -->
+        <div class="btn-group">
+            <button class="btn btn-pink" onclick="randomTitle()">🎲 换称号</button>
+            <button class="btn btn-gold" onclick="praiseZheng()">💖 夸夸筝</button>
+        </div>
+
+        <!-- 计数器 -->
+        <div>
+            <span class="counter-box">🎀 今日被夸：<span id="praiseCount">0</span> 次</span>
+        </div>
+
+        <!-- 夸夸显示 -->
+        <div class="praise-area">
+            <div class="praise-text" id="praiseText">💕 筝筝最可爱了！</div>
+        </div>
+
+        <div class="footer">
+            ✨ 筝筝是一个小宝贝儿 · 不接受反驳 ✨
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 1. 称号库
+        // ============================================================
+        const titles = [
+            '小肥筝', 'little筝', '肥肥筝', '胖胖筝',
+            '小笨蛋儿', '筝宝贝', '可爱筝', '团宠筝',
+            '小肉球筝', '软软筝', '糯米筝', '甜甜筝',
+            '迷糊筝', '小憨筝', '宇宙无敌可爱筝'
+        ];
+
+        let currentTitle = '小肥筝';
+
+        function randomTitle() {
+            const el = document.getElementById('titleText');
+            let newTitle;
+            do {
+                newTitle = titles[Math.floor(Math.random() * titles.length)];
+            } while (newTitle === currentTitle && titles.length > 1);
+            currentTitle = newTitle;
+            el.textContent = newTitle;
+            el.classList.remove('pop');
+            void el.offsetWidth;
+            el.classList.add('pop');
+            // 顺便撒点小花
+            createConfetti(16);
+        }
+
+        // ============================================================
+        // 2. 夸夸系统
+        // ============================================================
+        const praises = [
+            '💕 筝筝最可爱了！',
+            '🌸 筝筝是全世界最好的宝贝！',
+            '🎀 小肥筝天下第一！',
+            '💖 筝筝宝贝我爱你！',
+            '✨ 筝筝今天也超级棒！',
+            '🍬 筝筝比糖还甜！',
+            '🌈 筝筝是我的小太阳！',
+            '🌟 筝筝闪闪发光！',
+            '🎉 筝筝太招人喜欢了！',
+            '💗 筝筝是团宠！不接受反驳！',
+            '🧸 筝筝像小熊一样可爱！',
+            '🍭 筝筝是人间小甜豆！',
+            '💫 筝筝就是宝藏女孩！',
+            '🌺 筝筝比花还美！',
+            '🎊 筝筝是宇宙第一可爱！'
+        ];
+
+        let praiseCount = parseInt(localStorage.getItem('zheng_praise') || '0');
+
+        function updatePraiseDisplay() {
+            document.getElementById('praiseCount').textContent = praiseCount;
+            localStorage.setItem('zheng_praise', String(praiseCount));
+        }
+
+        function praiseZheng() {
+            praiseCount++;
+            updatePraiseDisplay();
+
+            const el = document.getElementById('praiseText');
+            const msg = praises[Math.floor(Math.random() * praises.length)];
+            el.textContent = msg;
+            el.classList.remove('pop');
+            void el.offsetWidth;
+            el.classList.add('pop');
+
+            // 撒花
+            createConfetti(30);
+
+            // 随机弹幕夸夸
+            addDanmaku(msg);
+
+            // 每10次弹个彩蛋
+            if (praiseCount % 10 === 0) {
+                setTimeout(() => {
+                    alert('🎉 筝筝宝贝！你已经被夸了 ' + praiseCount + ' 次！\n全世界最幸福的小笨蛋！');
+                }, 400);
+            }
+        }
+
+        updatePraiseDisplay();
+
+        // ============================================================
+        // 3. 弹幕系统
+        // ============================================================
+        const danmakuMessages = [
+            '筝筝好可爱～', '小肥筝天下第一！', '筝筝宝贝我爱你！',
+            '筝筝是最棒的！', '可爱筝筝～', '筝筝加油！',
+            '筝筝是团宠！', 'little筝超可爱！', '肥肥筝最萌！',
+            '筝筝是一个小宝贝儿～', '筝筝宝贝全世界最好！',
+            '筝筝今天也超乖！', '胖胖筝也可爱！', '筝筝小笨蛋～'
+        ];
+
+        let danmakuInterval;
+
+        function initDanmaku() {
+            const container = document.getElementById('danmakuContainer');
+            // 先清空
+            container.innerHTML = '';
+            // 初始生成一批
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => addDanmaku(), i * 800);
+            }
+            // 定时生成
+            if (danmakuInterval) clearInterval(danmakuInterval);
+            danmakuInterval = setInterval(() => addDanmaku(), 2500);
+        }
+
+        function addDanmaku(customMsg) {
+            const container = document.getElementById('danmakuContainer');
+            const el = document.createElement('div');
+            el.className = 'danmaku-item';
+
+            const msg = customMsg || danmakuMessages[Math.floor(Math.random() * danmakuMessages.length)];
+            el.textContent = msg;
+
+            // 随机样式
+            const colors = ['#e84393', '#fd79a8', '#6c5ce7', '#fdcb6e', '#00b894', '#0984e3', '#e17055'];
+            const sizes = ['0.9rem', '1.0rem', '1.2rem', '1.4rem'];
+            el.style.color = colors[Math.floor(Math.random() * colors.length)];
+            el.style.fontSize = sizes[Math.floor(Math.random() * sizes.length)];
+            el.style.top = (Math.random() * 90 + 2) + '%';
+            el.style.animationDuration = (10 + Math.random() * 14) + 's';
+            el.style.animationDelay = '0s';
+
+            container.appendChild(el);
+
+            // 自动移除
+            setTimeout(() => {
+                if (el.parentNode) el.remove();
+            }, 25000);
+        }
+
+        initDanmaku();
+
+        // ============================================================
+        // 4. 撒花特效
+        // ============================================================
+        function createConfetti(count) {
+            const container = document.getElementById('confettiContainer');
+            const colors = ['#e84393', '#fd79a8', '#fdcb6e', '#6c5ce7', '#00b894', '#0984e3', '#ff6b6b', '#f39c12'];
+
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                el.style.left = (Math.random() * 100) + '%';
+                el.style.top = '-10px';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.width = (6 + Math.random() * 10) + 'px';
+                el.style.height = (6 + Math.random() * 10) + 'px';
+                el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                el.style.animationDuration = (2 + Math.random() * 3) + 's';
+                el.style.animationDelay = (Math.random() * 0.8) + 's';
+                container.appendChild(el);
+
+                setTimeout(() => {
+                    if (el.parentNode) el.remove();
+                }, 5000);
+            }
+        }
+
+        // ============================================================
+        // 5. 背景浮动小心心
+        // ============================================================
+        function createHearts() {
+            const container = document.getElementById('heartContainer');
+            const emojis = ['❤️', '💕', '💗', '💖', '🌸', '✨'];
+            for (let i = 0; i < 20; i++) {
+                const el = document.createElement('div');
+                el.className = 'floating-heart';
+                el.textContent = emojis[i % emojis.length];
+                el.style.fontSize = (1.2 + Math.random() * 2.8) + 'rem';
+                el.style.left = (Math.random() * 96) + '%';
+                el.style.animationDuration = (12 + Math.random() * 20) + 's';
+                el.style.animationDelay = (Math.random() * 16) + 's';
+                el.style.opacity = 0.06 + Math.random() * 0.12;
+                container.appendChild(el);
+            }
+        }
+        createHearts();
+
+        // ============================================================
+        // 6. 页面加载时撒花欢迎
+        // ============================================================
+        window.addEventListener('load', () => {
+            setTimeout(() => createConfetti(25), 500);
+        });
+
+        console.log('🎀 筝筝宝贝页面已加载！');
+    </script>
+</body>
+</html>
