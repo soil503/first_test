@@ -14,6 +14,12 @@ body {
   overflow:hidden; position:relative;
 }
 #starCanvas { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:2; }
+#petalsContainer {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+}
 .petal {
   position:absolute; font-size:2rem; opacity:.6;
   animation:floatPetals linear infinite; pointer-events:none; user-select:none;
@@ -269,9 +275,8 @@ h1 {
 </style>
 </head>
 <body>
-
 <canvas id="starCanvas"></canvas>
-
+<div id="petalsContainer"></div>
 <div class="envelope-overlay" id="envelopeOverlay">
   <div class="envelope" id="envelope" onclick="openEnvelope()">
     <div class="envelope-flap"></div>
@@ -279,32 +284,24 @@ h1 {
     <div class="envelope-hint">✨ 点击开启祝福 ✨</div>
   </div>
 </div>
-
-<div id="petalsContainer"></div>
-
 <div class="card-scene" id="cardScene">
   <div class="card" id="card">
     <div class="icon">🌹</div>
     <h1>教师节快乐</h1>
     <div class="sub">—— 桃李满天下 · 春晖遍四方 ——</div>
-
     <div class="poem">
       “ 三尺讲台，三寸舌，三寸笔，三千桃李 ”
       <span>—— 致敬每一位辛勤的园丁</span>
     </div>
-
     <div class="button-group">
       <button class="btn" onclick="showSurprise(0)">🌸 点击送祝福</button>
       <button class="btn secondary" onclick="showSurprise(1)">📜 再颂师恩</button>
       <button class="btn quote" onclick="showSurprise(2)">✨ 玄玄语录</button>
     </div>
-
     <div class="surprise" id="surpriseMessage">💐 老师，您辛苦了！</div>
-
     <div class="share-row">
       <button class="btn share" onclick="generateCardImage()">📸 生成贺卡图片</button>
     </div>
-
     <div class="message-wall">
       <div class="wall-title">感 恩 留 言 墙</div>
       <div class="wall-input-row">
@@ -313,16 +310,13 @@ h1 {
       </div>
       <div class="wall-notes" id="wallNotes"></div>
     </div>
-
     <div class="footer-note">
       <span>✨ 教诲如春风</span>
       <span>✨ 师恩似海深</span>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast">✅ 贺卡已生成，请查收下载</div>
-
 <script>
 /* ===== 星光粒子 ===== */
 (function initStars(){
@@ -367,19 +361,18 @@ h1 {
   resize(); createStars(); draw();
   window.addEventListener('resize', ()=>{ resize(); createStars(); });
 })();
-
 /* ===== 信封开场 ===== */
 function openEnvelope(){
   const envelope = document.getElementById('envelope');
   const overlay = document.getElementById('envelopeOverlay');
   const cardScene = document.getElementById('cardScene');
+  if(envelope.classList.contains('open')) return;
   envelope.classList.add('open');
   setTimeout(()=>{
     overlay.classList.add('hide');
     cardScene.classList.add('revealed');
   }, 500);
 }
-
 /* ===== 花瓣 ===== */
 function createPetals(){
   const container = document.getElementById('petalsContainer');
@@ -398,7 +391,6 @@ function createPetals(){
   }
 }
 createPetals();
-
 /* ===== 惊喜文案 ===== */
 const messagesList = [
   [
@@ -427,56 +419,50 @@ const messagesList = [
     '口无遮拦！'
   ]
 ];
-
 function cardPulse(){
   const card = document.getElementById('card');
   card.style.transition = 'transform .1s';
   card.style.transform = 'scale(.98) rotateX(1deg)';
-  setTimeout(()=>{ card.style.transform = ''; }, 140);
+  setTimeout(()=>{
+    card.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1), box-shadow .4s';
+    card.style.transform = '';
+  }, 140);
 }
-
 function showSurprise(type = 0){
   const el = document.getElementById('surpriseMessage');
-  let selectedArray, isQuote = false;
-  if (type === 2){ selectedArray = messagesList[2]; isQuote = true; }
-  else if (type === 1){ selectedArray = messagesList[1]; }
-  else { selectedArray = messagesList[0]; }
-
-  let randomMsg = selectedArray[Math.floor(Math.random()*selectedArray.length)];
-  const currentRaw = el.textContent.replace(/（2016\.9-2018\.6）/g,'').trim();
-  if (selectedArray.length > 1 && randomMsg === currentRaw){
-    randomMsg = selectedArray[Math.floor(Math.random()*selectedArray.length)];
-  }
-
-  if (isQuote){
-    el.innerHTML = randomMsg + ' <span class="quote-tag">2016.9-2018.6</span>';
-  } else {
-    el.textContent = randomMsg;
-  }
-  el.classList.add('show');
-  cardPulse();
-
-  const tempPetal = document.createElement('div');
-  tempPetal.className = 'petal';
-  tempPetal.textContent = ['🌸','🌺','🌼','💮','🏵️'][Math.floor(Math.random()*5)];
-  tempPetal.style.fontSize = (1.8+Math.random()*2)+'rem';
-  tempPetal.style.left = (20+Math.random()*60)+'%';
-  tempPetal.style.animationDuration = (4+Math.random()*4)+'s';
-  tempPetal.style.animationDelay = '0s';
-  tempPetal.style.opacity = '0.8';
-  tempPetal.style.zIndex = '30';
-  document.body.appendChild(tempPetal);
-  setTimeout(()=>{ tempPetal.remove(); }, 6000);
+  el.classList.remove('show');
+  setTimeout(()=>{
+    let selectedArray, isQuote = false;
+    if (type === 2){ selectedArray = messagesList[2]; isQuote = true; }
+    else if (type === 1){ selectedArray = messagesList[1]; }
+    else { selectedArray = messagesList[0]; }
+    let randomMsg = selectedArray[Math.floor(Math.random()*selectedArray.length)];
+    if (isQuote){
+      el.innerHTML = randomMsg + ' <span class="quote-tag">2016.9-2018.6</span>';
+    } else {
+      el.textContent = randomMsg;
+    }
+    el.classList.add('show');
+    cardPulse();
+    const tempPetal = document.createElement('div');
+    tempPetal.className = 'petal';
+    tempPetal.textContent = ['🌸','🌺','🌼','💮','🏵️'][Math.floor(Math.random()*5)];
+    tempPetal.style.fontSize = (1.8+Math.random()*2)+'rem';
+    tempPetal.style.left = (20+Math.random()*60)+'%';
+    tempPetal.style.animationDuration = (4+Math.random()*4)+'s';
+    tempPetal.style.animationDelay = '0s';
+    tempPetal.style.opacity = '0.8';
+    tempPetal.style.zIndex = '30';
+    document.body.appendChild(tempPetal);
+    setTimeout(()=>{ tempPetal.remove(); }, 6000);
+  },100)
 }
-
 document.getElementById('card').addEventListener('mouseleave', function(){
   this.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1), box-shadow .4s';
   this.style.transform = '';
 });
-
 /* ===== 感恩留言墙 ===== */
 const STORAGE_KEY = 'teacher_day_notes_v1';
-
 function loadNotes(){
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
   catch(e){ return []; }
@@ -513,7 +499,6 @@ function renderNotes(){
     box.appendChild(note);
   });
 }
-
 function addNote(){
   const input = document.getElementById('wallInput');
   const text = input.value.trim();
@@ -533,7 +518,6 @@ document.getElementById('wallInput').addEventListener('keydown', e=>{
   if (e.key === 'Enter') addNote();
 });
 renderNotes();
-
 /* ===== 生成贺卡图片 ===== */
 function generateCardImage(){
   const card = document.getElementById('card');
@@ -558,7 +542,6 @@ function generateCardImage(){
     showToast('生成失败，请重试');
   });
 }
-
 /* ===== Toast ===== */
 let toastTimer = null;
 function showToast(msg){
@@ -571,3 +554,4 @@ function showToast(msg){
 </script>
 </body>
 </html>
+
