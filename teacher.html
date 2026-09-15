@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>教师节 · 春风桃李</title>
+    <title>教师节</title>
     <style>
         * {
             margin: 0;
@@ -170,12 +170,22 @@
             box-shadow: 0 10px 22px rgba(140, 30, 150, 0.35);
         }
 
+        /* 新增：玄玄语录按钮样式（淡金色/暖调） */
+        .btn.quote {
+            background: linear-gradient(135deg, #ffb74d, #f57c00);
+            box-shadow: 0 10px 22px rgba(230, 120, 20, 0.4);
+            border: 1px solid rgba(255, 255, 200, 0.5);
+        }
+
         .btn:hover {
             transform: translateY(-4px) scale(1.04);
             box-shadow: 0 16px 30px rgba(200, 30, 80, 0.5);
         }
         .btn.secondary:hover {
             box-shadow: 0 16px 30px rgba(140, 30, 150, 0.5);
+        }
+        .btn.quote:hover {
+            box-shadow: 0 16px 30px rgba(230, 120, 20, 0.6);
         }
 
         .btn:active {
@@ -202,7 +212,23 @@
             transform: translateY(0);
         }
 
-        /* 新增：显示诗词出处小字 */
+        /* 语录小尾巴（2016.9-2018.6标注） */
+        .quote-tag {
+            display: inline-block;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            color: #a1586b;
+            background: rgba(255, 235, 240, 0.8);
+            padding: 2px 12px;
+            border-radius: 30px;
+            margin-left: 10px;
+            vertical-align: middle;
+            font-weight: normal;
+            backdrop-filter: blur(4px);
+            border: 1px solid #ffcdd2;
+        }
+
+        /* 显示诗词出处小字 */
         .footer-note {
             margin-top: 20px;
             font-size: 0.88rem;
@@ -263,6 +289,10 @@
                 font-size: 1rem;
                 letter-spacing: 2px;
             }
+            .quote-tag {
+                font-size: 0.7rem;
+                padding: 1px 8px;
+            }
         }
 
         @media (max-width: 380px) {
@@ -294,13 +324,16 @@
                 <span>—— 致敬每一位辛勤的园丁</span>
             </div>
 
-            <!-- 按钮组：两个交互按钮 -->
+            <!-- 按钮组：三个交互按钮（新增玄玄语录） -->
             <div class="button-group">
                 <button class="btn" onclick="showSurprise(0)">🌸 点击送祝福</button>
                 <button class="btn secondary" onclick="showSurprise(1)">📜 再颂师恩</button>
+                <button class="btn quote" onclick="showSurprise(2)">✨ 玄玄语录</button>
             </div>
 
+            <!-- 惊喜消息区：显示文本，玄玄语录时会附带时间标签 -->
             <div class="surprise" id="surpriseMessage">💐 老师，您辛苦了！</div>
+
             <div class="footer-note">
                 <span>✨ 教诲如春风</span>
                 <span>✨ 师恩似海深</span>
@@ -334,11 +367,24 @@
         createPetals();
 
         // ===== 点击惊喜（多种文案 + 触感反馈）=====
+        // 索引 0: 祝福老师  1: 诗词名言  2: 玄玄语录(新增)
         let messageIndex = 0;
+
+        // 玄玄语录专用数组 (带时间标记 2016.9-2018.6)
+        const xuanXuanQuotes = [
+            '愿你之后的每场梦都不会空',
+            '我的语速快吗？我普通话可是国家二级甲！（傲娇）',
+            '这天天的！',
+            'go out!',
+            '口无遮拦！'
+        ];
+
+        // 注意: 为避免和上一句重复，我们保留随机逻辑，但不会影响展示。
+
         const messagesList = [
             [ // 第一组：祝福老师
                 '💐 晓玄老师，您辛苦了！',
-                '🌟 老师，我想你了！',
+                '🌟 老师 我想你了',
                 '📚 感谢您的谆谆教诲！',
                 '🌹 愿您永远健康快乐！',
                 '🏆 您是最美的园丁！',
@@ -350,10 +396,16 @@
                 '“新竹高于旧竹枝，全凭老干为扶持。”',
                 '“令公桃李满天下，何用堂前更种花。”',
                 '“落红不是无情物，化作春泥更护花。”',
-                '“春蚕到死丝方尽，蜡炬成灰泪始干。”',
                 '“忽遇文殊开慧眼，他年应记老师心。”',
                 '“偶应非熊兆，尊为帝者师。”',
                 '“师者，所以传道授业解惑也。”'
+            ],
+            [ // 第三组：玄玄语录（加时间标注）
+                '愿你之后的每场梦都不会空',
+                '我的语速快吗？我普通话可是国家二级甲！（傲娇）',
+                '这天天的！',
+                'go out!',
+                '口无遮拦！'
             ]
         ];
 
@@ -367,18 +419,47 @@
             }, 140);
         }
 
-        // 主函数：type 0 表示祝福按钮，1 表示诗句按钮
+        // 主函数：type 0 表示祝福按钮，1 表示诗句按钮，2 表示玄玄语录
         function showSurprise(type = 0) {
             const el = document.getElementById('surpriseMessage');
-            let selectedArray = messagesList[type] || messagesList[0];
-            // 随机选取一条，但避免和上一条完全重复（小优化）
+            let selectedArray;
+            let isQuote = false; // 是否是玄玄语录
+
+            if (type === 2) {
+                // 玄玄语录
+                selectedArray = messagesList[2];
+                isQuote = true;
+            } else if (type === 1) {
+                selectedArray = messagesList[1];
+            } else {
+                selectedArray = messagesList[0];
+            }
+
+            // 随机选取一条
             let randomMsg = selectedArray[Math.floor(Math.random() * selectedArray.length)];
-            // 如果是同一条并且数组长度大于1，再随机一次
-            if (selectedArray.length > 1 && el.textContent === randomMsg) {
+
+            // 如果数组长度>1，避免和当前显示的完全一样（简单去重，忽略带span的情况）
+            // 因为玄玄语录现在可能带标签，我们基于原始内容去重，但显示可能加标签
+            const currentRawText = el.textContent.replace(/（2016\.9-2018\.6）/g, '').replace(/\s*✨?玄玄✨?\s*/g, '').trim();
+            // 如果当前显示包含这条文本且数组长度>1，重新随机一次
+            if (selectedArray.length > 1 && randomMsg === currentRawText) {
                 randomMsg = selectedArray[Math.floor(Math.random() * selectedArray.length)];
             }
 
-            el.textContent = randomMsg;
+            // 构建显示内容
+            let displayHtml = randomMsg;
+            if (isQuote) {
+                // 添加时间标签 (2016.9-2018.6)
+                displayHtml = `${randomMsg} <span class="quote-tag">2016.9-2018.6</span>`;
+                // 但el.textContent会丢失html，我们改用innerHTML
+            }
+
+            if (isQuote) {
+                el.innerHTML = displayHtml;
+            } else {
+                el.textContent = randomMsg;
+            }
+
             el.classList.add('show');
 
             // 触发卡片微动
@@ -407,6 +488,9 @@
             this.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s';
             this.style.transform = '';
         });
+
+        // 因为新增了innerHTML方式，每次显示前确保移除多余的标签？初始消息不含标签，无需处理。
+        // 但首次显示时若随机到玄玄语录会有标签，没问题。
     </script>
 </body>
 </html>
