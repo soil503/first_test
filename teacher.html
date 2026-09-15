@@ -1,923 +1,573 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>教师节</title>
-    <!-- 引入 html2canvas 用于生成贺卡图片 -->
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: '华文楷体', 'KaiTi', 'Microsoft YaHei', serif;
-            background: radial-gradient(circle at 20% 30%, #fde7f0, #fbc4d5 45%, #f59bb6 70%, #e76f9c);
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* ===== 动态星光粒子（canvas） ===== */
-        #starCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        /* ===== 飘浮花瓣/光点 ===== */
-        .petal {
-            position: absolute;
-            font-size: 2rem;
-            opacity: 0.6;
-            animation: floatPetals linear infinite;
-            pointer-events: none;
-            user-select: none;
-            filter: drop-shadow(0 0 6px rgba(255, 220, 240, 0.7));
-            z-index: 1;
-        }
-        @keyframes floatPetals {
-            0% {
-                transform: translateY(105vh) rotate(0deg) scale(0.8);
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(-15vh) rotate(720deg) scale(1.2);
-                opacity: 0.15;
-            }
-        }
-
-        /* ===== 信封开场动画 ===== */
-        .envelope-overlay {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 220, 235, 0.9), rgba(230, 100, 150, 0.85));
-            z-index: 100;
-            transition: opacity 0.8s ease, visibility 0.8s;
-            backdrop-filter: blur(6px);
-        }
-
-        .envelope-overlay.hide {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .envelope {
-            position: relative;
-            width: 260px;
-            height: 180px;
-            background: linear-gradient(135deg, #fff0f5, #ffd9e4);
-            border-radius: 8px;
-            box-shadow: 0 20px 50px rgba(150, 20, 70, 0.4), 0 0 0 3px #ffb6c1 inset;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s;
-            animation: envelopeFloat 2s ease-in-out infinite;
-        }
-
-        .envelope:hover {
-            transform: scale(1.05);
-            box-shadow: 0 30px 70px rgba(150, 20, 70, 0.5), 0 0 0 3px #ff8fab inset;
-        }
-
-        @keyframes envelopeFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        /* 信封封口三角 */
-        .envelope-flap {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 0;
-            border-left: 130px solid transparent;
-            border-right: 130px solid transparent;
-            border-top: 90px solid #ff9eb5;
-            border-radius: 8px 8px 0 0;
-            transition: transform 0.6s ease;
-            transform-origin: top;
-            filter: drop-shadow(0 2px 4px rgba(180, 40, 90, 0.3));
-            z-index: 2;
-        }
-
-        .envelope.open .envelope-flap {
-            transform: rotateX(180deg);
-        }
-
-        /* 信封爱心封蜡 */
-        .envelope-seal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -30%);
-            font-size: 2.2rem;
-            z-index: 3;
-            filter: drop-shadow(0 2px 6px rgba(200, 30, 80, 0.5));
-            animation: sealPulse 1.5s infinite alternate;
-        }
-
-        @keyframes sealPulse {
-            0% { transform: translate(-50%, -30%) scale(1); }
-            100% { transform: translate(-50%, -30%) scale(1.15); }
-        }
-
-        .envelope-hint {
-            position: absolute;
-            bottom: -44px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1rem;
-            color: #fff;
-            letter-spacing: 2px;
-            white-space: nowrap;
-            text-shadow: 0 2px 8px rgba(150, 20, 70, 0.6);
-            animation: hintBlink 1.8s infinite;
-        }
-
-        @keyframes hintBlink {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-
-        /* ===== 3D 卡片容器 ===== */
-        .card-scene {
-            perspective: 1200px;
-            width: 90%;
-            max-width: 620px;
-            position: relative;
-            z-index: 20;
-            opacity: 0;
-            transform: translateY(40px) scale(0.95);
-            transition: opacity 0.8s ease 0.3s, transform 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.3s;
-        }
-
-        .card-scene.revealed {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
-        .card {
-            background: rgba(255, 250, 245, 0.85);
-            backdrop-filter: blur(12px);
-            padding: 50px 40px 40px;
-            border-radius: 68px 28px 68px 28px;
-            box-shadow: 0 30px 60px rgba(190, 30, 90, 0.3),
-                        0 0 0 2px rgba(255, 240, 245, 0.8) inset,
-                        0 0 0 4px rgba(255, 210, 225, 0.5);
-            text-align: center;
-            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s;
-            transform-style: preserve-3d;
-            will-change: transform;
-            border: 1px solid rgba(255, 255, 255, 0.7);
-        }
-
-        /* 悬停3D翻转效果 */
-        .card:hover {
-            transform: rotateX(2deg) rotateY(-2deg) scale(1.02);
-            box-shadow: 0 50px 100px rgba(190, 30, 90, 0.4),
-                        0 0 0 3px rgba(255, 200, 220, 0.7) inset;
-        }
-
-        /* ===== 卡片内部元素 ===== */
-        .icon {
-            font-size: 4.6rem;
-            line-height: 1.1;
-            filter: drop-shadow(0 8px 12px rgba(220, 80, 140, 0.4));
-            animation: gentleWave 3s infinite alternate ease-in-out;
-            display: inline-block;
-        }
-        @keyframes gentleWave {
-            0% { transform: rotate(-3deg) scale(1); }
-            100% { transform: rotate(3deg) scale(1.05); }
-        }
-
-        h1 {
-            font-size: 3rem;
-            background: linear-gradient(135deg, #c2185b, #9c1a4a, #ad1457);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
-            letter-spacing: 8px;
-            margin: 4px 0 0;
-            text-shadow: 0 4px 12px rgba(200, 40, 100, 0.25);
-            transform: translateZ(20px);
-        }
-
-        .sub {
-            font-size: 1.15rem;
-            color: #6a1b3a;
-            margin: 14px 0 10px;
-            letter-spacing: 3px;
-            border-top: 2px dashed #f48fb1;
-            padding-top: 18px;
-            font-weight: 400;
-            text-shadow: 0 1px 3px #fff8;
-        }
-
-        .poem {
-            font-size: 1.35rem;
-            line-height: 2.3rem;
-            color: #4a1a2a;
-            margin: 22px 0 26px;
-            background: rgba(255, 255, 255, 0.55);
-            padding: 22px 18px;
-            border-radius: 50px 12px 50px 12px;
-            font-style: italic;
-            box-shadow: 0 6px 18px rgba(230, 120, 160, 0.15) inset,
-                        0 4px 10px rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(255, 230, 240, 0.9);
-            transform: translateZ(12px);
-        }
-
-        .poem span {
-            display: block;
-            font-size: 0.95rem;
-            color: #7a4a5a;
-            margin-top: 10px;
-            font-style: normal;
-            letter-spacing: 2px;
-            opacity: 0.9;
-        }
-
-        /* ===== 按钮组 ===== */
-        .button-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
-            transform: translateZ(16px);
-        }
-
-        .btn {
-            padding: 14px 32px;
-            border: none;
-            border-radius: 50px;
-            background: linear-gradient(135deg, #ec407a, #d81b60);
-            color: #fff;
-            font-size: 1.15rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 22px rgba(200, 30, 80, 0.4);
-            letter-spacing: 2px;
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn.secondary {
-            background: linear-gradient(135deg, #ba68c8, #9c27b0);
-            box-shadow: 0 10px 22px rgba(140, 30, 150, 0.35);
-        }
-
-        /* 玄玄语录按钮样式（淡金色/暖调） */
-        .btn.quote {
-            background: linear-gradient(135deg, #ffb74d, #f57c00);
-            box-shadow: 0 10px 22px rgba(230, 120, 20, 0.4);
-            border: 1px solid rgba(255, 255, 200, 0.5);
-        }
-
-        /* 生成贺卡按钮样式 */
-        .btn.share {
-            background: linear-gradient(135deg, #4fc3f7, #0288d1);
-            box-shadow: 0 10px 22px rgba(2, 100, 180, 0.4);
-            border: 1px solid rgba(200, 240, 255, 0.5);
-        }
-
-        .btn:hover {
-            transform: translateY(-4px) scale(1.04);
-            box-shadow: 0 16px 30px rgba(200, 30, 80, 0.5);
-        }
-        .btn.secondary:hover {
-            box-shadow: 0 16px 30px rgba(140, 30, 150, 0.5);
-        }
-        .btn.quote:hover {
-            box-shadow: 0 16px 30px rgba(230, 120, 20, 0.6);
-        }
-        .btn.share:hover {
-            box-shadow: 0 16px 30px rgba(2, 100, 180, 0.6);
-        }
-
-        .btn:active {
-            transform: scale(0.96);
-            box-shadow: 0 4px 10px rgba(200, 30, 80, 0.4);
-        }
-
-        /* ===== 惊喜彩蛋区 ===== */
-        .surprise {
-            margin-top: 24px;
-            font-size: 1.8rem;
-            min-height: 4rem;
-            opacity: 0;
-            transition: opacity 0.5s ease, transform 0.4s;
-            color: #880e4f;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-shadow: 0 2px 10px rgba(255, 200, 220, 0.8);
-            transform: translateY(6px);
-            line-height: 1.4;
-        }
-        .surprise.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* 语录小尾巴（2016.9-2018.6标注） */
-        .quote-tag {
-            display: inline-block;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-            color: #a1586b;
-            background: rgba(255, 235, 240, 0.8);
-            padding: 2px 12px;
-            border-radius: 30px;
-            margin-left: 10px;
-            vertical-align: middle;
-            font-weight: normal;
-            backdrop-filter: blur(4px);
-            border: 1px solid #ffcdd2;
-        }
-
-        /* 显示诗词出处小字 */
-        .footer-note {
-            margin-top: 20px;
-            font-size: 0.88rem;
-            color: #8a4a5a;
-            opacity: 0.7;
-            letter-spacing: 1.5px;
-            font-style: normal;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .footer-note span {
-            background: rgba(255, 240, 245, 0.5);
-            padding: 3px 10px;
-            border-radius: 30px;
-            backdrop-filter: blur(4px);
-        }
-
-        /* 卡片内飘落的动态光点（纯CSS装饰） */
-        .card::after {
-            content: '';
-            position: absolute;
-            inset: 8px;
-            border-radius: 58px 20px 58px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            pointer-events: none;
-        }
-
-        /* ===== 感恩留言墙 ===== */
-        .message-wall {
-            margin-top: 28px;
-            padding-top: 22px;
-            border-top: 2px dashed #f8bbd0;
-            transform: translateZ(10px);
-        }
-
-        .wall-title {
-            font-size: 1.1rem;
-            color: #880e4f;
-            letter-spacing: 3px;
-            margin-bottom: 14px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .wall-title::before,
-        .wall-title::after {
-            content: '✦';
-            color: #ec407a;
-            font-size: 0.8rem;
-            opacity: 0.6;
-        }
-
-        .wall-input-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-
-        .wall-input {
-            flex: 1;
-            padding: 12px 18px;
-            border-radius: 40px;
-            border: 2px solid #f8bbd0;
-            background: rgba(255, 255, 255, 0.85);
-            font-family: inherit;
-            font-size: 0.98rem;
-            color: #4a1a2a;
-            outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .wall-input:focus {
-            border-color: #ec407a;
-            box-shadow: 0 0 0 4px rgba(236, 64, 122, 0.15);
-        }
-
-        .wall-input::placeholder {
-            color: #c48a9e;
-            letter-spacing: 1px;
-        }
-
-        .wall-submit {
-            padding: 12px 22px;
-            border: none;
-            border-radius: 40px;
-            background: linear-gradient(135deg, #ec407a, #c2185b);
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.95rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 6px 16px rgba(200, 30, 80, 0.35);
-            white-space: nowrap;
-        }
-
-        .wall-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 22px rgba(200, 30, 80, 0.45);
-        }
-
-        .wall-submit:active {
-            transform: scale(0.96);
-        }
-
-        .wall-notes {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            max-height: 200px;
-            overflow-y: auto;
-            padding: 4px 2px 8px;
-            scrollbar-width: thin;
-            scrollbar-color: #f48fb1 transparent;
-        }
-
-        .wall-notes::-webkit-scrollbar {
-            width: 6px;
-        }
-        .wall-notes::-webkit-scrollbar-thumb {
-            background: #f48fb1;
-            border-radius: 10px;
-        }
-
-        .note {
-            position: relative;
-            background: linear-gradient(135deg, #fff9c4, #fff59d);
-            padding: 10px 16px 12px;
-            border-radius: 4px 16px 4px 16px;
-            font-size: 0.9rem;
-            color: #5d4037;
-            letter-spacing: 0.5px;
-            line-height: 1.5;
-            box-shadow: 0 4px 10px rgba(180, 120, 40, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
-            max-width: 240px;
-            word-break: break-word;
-            animation: noteAppear 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            transform-origin: center;
-            text-align: left;
-        }
-
-        /* 便签随机旋转，模拟手贴效果 */
-        .note:nth-child(3n) { transform: rotate(-1.5deg); }
-        .note:nth-child(3n+1) { transform: rotate(1deg); }
-        .note:nth-child(3n+2) { transform: rotate(-0.5deg); }
-
-        @keyframes noteAppear {
-            0% { opacity: 0; transform: scale(0.7) rotate(-4deg); }
-            100% { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); }
-        }
-
-        .note-delete {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: #ef5350;
-            color: #fff;
-            border: 2px solid #fff;
-            font-size: 0.8rem;
-            line-height: 1;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.2s, transform 0.2s;
-            box-shadow: 0 2px 6px rgba(200, 0, 0, 0.3);
-        }
-
-        .note:hover .note-delete {
-            opacity: 1;
-        }
-
-        .note-delete:hover {
-            transform: scale(1.15);
-        }
-
-        .wall-empty {
-            font-size: 0.88rem;
-            color: #c48a9e;
-            letter-spacing: 1px;
-            padding: 12px;
-        }
-
-        /* 分享按钮区域 */
-        .share-row {
-            margin-top: 18px;
-            display: flex;
-            justify-content: center;
-            transform: translateZ(14px);
-        }
-
-        /* 分享成功提示 */
-        .toast {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: rgba(136, 14, 79, 0.92);
-            color: #fff;
-            padding: 12px 28px;
-            border-radius: 40px;
-            font-size: 0.95rem;
-            letter-spacing: 2px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s, transform 0.4s;
-            z-index: 200;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 10px 30px rgba(150, 20, 70, 0.4);
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* ===== 响应式优化 ===== */
-        @media (max-width: 520px) {
-            .card {
-                padding: 36px 22px 32px;
-                border-radius: 44px 18px 44px 18px;
-            }
-            h1 {
-                font-size: 2.2rem;
-                letter-spacing: 4px;
-            }
-            .icon {
-                font-size: 3.6rem;
-            }
-            .poem {
-                font-size: 1.0rem;
-                line-height: 1.9rem;
-                padding: 16px 12px;
-            }
-            .btn {
-                font-size: 0.95rem;
-                padding: 11px 20px;
-            }
-            .surprise {
-                font-size: 1.4rem;
-                min-height: 3rem;
-            }
-            .sub {
-                font-size: 1rem;
-                letter-spacing: 2px;
-            }
-            .quote-tag {
-                font-size: 0.7rem;
-                padding: 1px 8px;
-            }
-            .envelope {
-                width: 200px;
-                height: 140px;
-            }
-            .envelope-flap {
-                border-left-width: 100px;
-                border-right-width: 100px;
-                border-top-width: 70px;
-            }
-            .envelope-seal {
-                font-size: 1.7rem;
-            }
-            .wall-input-row {
-                flex-direction: column;
-            }
-            .wall-submit {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 380px) {
-            .button-group {
-                flex-direction: column;
-                align-items: center;
-            }
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教师节</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  min-height:100vh; display:flex; justify-content:center; align-items:center;
+  font-family:'华文楷体','KaiTi','Microsoft YaHei',serif;
+  background:radial-gradient(circle at 20% 30%,#fde7f0,#fbc4d5 45%,#f59bb6 70%,#e76f9c);
+  overflow:hidden; position:relative;
+}
+#starCanvas { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:2; }
+.petal {
+  position:absolute; font-size:2rem; opacity:.6;
+  animation:floatPetals linear infinite; pointer-events:none; user-select:none;
+  filter:drop-shadow(0 0 6px rgba(255,220,240,.7)); z-index:1;
+}
+@keyframes floatPetals {
+  0% { transform:translateY(105vh) rotate(0deg) scale(.8); opacity:.7; }
+  100% { transform:translateY(-15vh) rotate(720deg) scale(1.2); opacity:.15; }
+}
+.envelope-overlay {
+  position:fixed; inset:0; display:flex; justify-content:center; align-items:center;
+  background:radial-gradient(circle at 50% 50%,rgba(255,220,235,.9),rgba(230,100,150,.85));
+  z-index:100; transition:opacity .8s ease, visibility .8s; backdrop-filter:blur(6px);
+}
+.envelope-overlay.hide { opacity:0; visibility:hidden; pointer-events:none; }
+.envelope {
+  position:relative; width:260px; height:180px;
+  background:linear-gradient(135deg,#fff0f5,#ffd9e4);
+  border-radius:8px;
+  box-shadow:0 20px 50px rgba(150,20,70,.4),0 0 0 3px #ffb6c1 inset;
+  cursor:pointer; transition:transform .3s ease, box-shadow .3s;
+  animation:envelopeFloat 2s ease-in-out infinite;
+}
+.envelope:hover { transform:scale(1.05); box-shadow:0 30px 70px rgba(150,20,70,.5),0 0 0 3px #ff8fab inset; }
+@keyframes envelopeFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+.envelope-flap {
+  position:absolute; top:0; left:0; width:0; height:0;
+  border-left:130px solid transparent; border-right:130px solid transparent;
+  border-top:90px solid #ff9eb5; border-radius:8px 8px 0 0;
+  transition:transform .6s ease; transform-origin:top;
+  filter:drop-shadow(0 2px 4px rgba(180,40,90,.3)); z-index:2;
+}
+.envelope.open .envelope-flap { transform:rotateX(180deg); }
+.envelope-seal {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-30%);
+  font-size:2.2rem; z-index:3; filter:drop-shadow(0 2px 6px rgba(200,30,80,.5));
+  animation:sealPulse 1.5s infinite alternate;
+}
+@keyframes sealPulse {
+  0% { transform:translate(-50%,-30%) scale(1); }
+  100% { transform:translate(-50%,-30%) scale(1.15); }
+}
+.envelope-hint {
+  position:absolute; bottom:-44px; left:50%; transform:translateX(-50%);
+  font-size:1rem; color:#fff; letter-spacing:2px; white-space:nowrap;
+  text-shadow:0 2px 8px rgba(150,20,70,.6); animation:hintBlink 1.8s infinite;
+}
+@keyframes hintBlink { 0%,100%{opacity:.6;} 50%{opacity:1;} }
+.card-scene {
+  perspective:1200px; width:90%; max-width:620px; position:relative; z-index:20;
+  opacity:0; transform:translateY(40px) scale(.95);
+  transition:opacity .8s ease .3s, transform .8s cubic-bezier(.23,1,.32,1) .3s;
+}
+.card-scene.revealed { opacity:1; transform:translateY(0) scale(1); }
+.card {
+  background:rgba(255,250,245,.85); backdrop-filter:blur(12px);
+  padding:50px 40px 40px; border-radius:68px 28px 68px 28px;
+  box-shadow:0 30px 60px rgba(190,30,90,.3),0 0 0 2px rgba(255,240,245,.8) inset,0 0 0 4px rgba(255,210,225,.5);
+  text-align:center; transition:transform .5s cubic-bezier(.23,1,.32,1), box-shadow .4s;
+  transform-style:preserve-3d; will-change:transform;
+  border:1px solid rgba(255,255,255,.7);
+}
+.card:hover {
+  transform:rotateX(2deg) rotateY(-2deg) scale(1.02);
+  box-shadow:0 50px 100px rgba(190,30,90,.4),0 0 0 3px rgba(255,200,220,.7) inset;
+}
+.icon {
+  font-size:4.6rem; line-height:1.1;
+  filter:drop-shadow(0 8px 12px rgba(220,80,140,.4));
+  animation:gentleWave 3s infinite alternate ease-in-out; display:inline-block;
+}
+@keyframes gentleWave {
+  0% { transform:rotate(-3deg) scale(1); }
+  100% { transform:rotate(3deg) scale(1.05); }
+}
+h1 {
+  font-size:3rem;
+  background:linear-gradient(135deg,#c2185b,#9c1a4a,#ad1457);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  font-weight:700; letter-spacing:8px; margin:4px 0 0;
+  text-shadow:0 4px 12px rgba(200,40,100,.25); transform:translateZ(20px);
+}
+.sub {
+  font-size:1.15rem; color:#6a1b3a; margin:14px 0 10px; letter-spacing:3px;
+  border-top:2px dashed #f48fb1; padding-top:18px; font-weight:400;
+  text-shadow:0 1px 3px #fff8;
+}
+.poem {
+  font-size:1.35rem; line-height:2.3rem; color:#4a1a2a; margin:22px 0 26px;
+  background:rgba(255,255,255,.55); padding:22px 18px;
+  border-radius:50px 12px 50px 12px; font-style:italic;
+  box-shadow:0 6px 18px rgba(230,120,160,.15) inset,0 4px 10px rgba(255,255,255,.6);
+  border:1px solid rgba(255,230,240,.9); transform:translateZ(12px);
+}
+.poem span {
+  display:block; font-size:.95rem; color:#7a4a5a; margin-top:10px;
+  font-style:normal; letter-spacing:2px; opacity:.9;
+}
+.button-group {
+  display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+  margin-bottom:6px; transform:translateZ(16px);
+}
+.btn {
+  padding:14px 32px; border:none; border-radius:50px;
+  background:linear-gradient(135deg,#ec407a,#d81b60);
+  color:#fff; font-size:1.15rem; font-weight:bold; cursor:pointer;
+  transition:all .3s ease; box-shadow:0 10px 22px rgba(200,30,80,.4);
+  letter-spacing:2px; font-family:inherit;
+  display:inline-flex; align-items:center; gap:8px;
+  border:1px solid rgba(255,255,255,.3);
+}
+.btn.secondary {
+  background:linear-gradient(135deg,#ba68c8,#9c27b0);
+  box-shadow:0 10px 22px rgba(140,30,150,.35);
+}
+.btn.quote {
+  background:linear-gradient(135deg,#ffb74d,#f57c00);
+  box-shadow:0 10px 22px rgba(230,120,20,.4);
+  border:1px solid rgba(255,255,200,.5);
+}
+.btn.share {
+  background:linear-gradient(135deg,#4fc3f7,#0288d1);
+  box-shadow:0 10px 22px rgba(2,100,180,.4);
+  border:1px solid rgba(200,240,255,.5);
+}
+.btn:hover { transform:translateY(-4px) scale(1.04); box-shadow:0 16px 30px rgba(200,30,80,.5); }
+.btn.secondary:hover { box-shadow:0 16px 30px rgba(140,30,150,.5); }
+.btn.quote:hover { box-shadow:0 16px 30px rgba(230,120,20,.6); }
+.btn.share:hover { box-shadow:0 16px 30px rgba(2,100,180,.6); }
+.btn:active { transform:scale(.96); box-shadow:0 4px 10px rgba(200,30,80,.4); }
+.surprise {
+  margin-top:24px; font-size:1.8rem; min-height:4rem;
+  opacity:0; transition:opacity .5s ease, transform .4s;
+  color:#880e4f; font-weight:bold; letter-spacing:2px;
+  text-shadow:0 2px 10px rgba(255,200,220,.8);
+  transform:translateY(6px); line-height:1.4;
+}
+.surprise.show { opacity:1; transform:translateY(0); }
+.quote-tag {
+  display:inline-block; font-size:.85rem; letter-spacing:1px;
+  color:#a1586b; background:rgba(255,235,240,.8);
+  padding:2px 12px; border-radius:30px; margin-left:10px;
+  vertical-align:middle; font-weight:normal;
+  backdrop-filter:blur(4px); border:1px solid #ffcdd2;
+}
+.footer-note {
+  margin-top:20px; font-size:.88rem; color:#8a4a5a; opacity:.7;
+  letter-spacing:1.5px; font-style:normal;
+  display:flex; justify-content:center; gap:12px; flex-wrap:wrap;
+}
+.footer-note span {
+  background:rgba(255,240,245,.5); padding:3px 10px;
+  border-radius:30px; backdrop-filter:blur(4px);
+}
+.card::after {
+  content:''; position:absolute; inset:8px;
+  border-radius:58px 20px 58px 20px;
+  border:1px solid rgba(255,255,255,.5); pointer-events:none;
+}
+.message-wall {
+  margin-top:28px; padding-top:22px;
+  border-top:2px dashed #f8bbd0; transform:translateZ(10px);
+}
+.wall-title {
+  font-size:1.1rem; color:#880e4f; letter-spacing:3px;
+  margin-bottom:14px; font-weight:bold;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.wall-title::before, .wall-title::after {
+  content:'✦'; color:#ec407a; font-size:.8rem; opacity:.6;
+}
+.wall-input-row { display:flex; gap:8px; margin-bottom:14px; }
+.wall-input {
+  flex:1; padding:12px 18px; border-radius:40px;
+  border:2px solid #f8bbd0; background:rgba(255,255,255,.85);
+  font-family:inherit; font-size:.98rem; color:#4a1a2a;
+  outline:none; transition:border-color .3s, box-shadow .3s;
+}
+.wall-input:focus { border-color:#ec407a; box-shadow:0 0 0 4px rgba(236,64,122,.15); }
+.wall-input::placeholder { color:#c48a9e; letter-spacing:1px; }
+.wall-submit {
+  padding:12px 22px; border:none; border-radius:40px;
+  background:linear-gradient(135deg,#ec407a,#c2185b);
+  color:#fff; font-family:inherit; font-size:.95rem; font-weight:bold;
+  letter-spacing:1px; cursor:pointer; transition:all .3s;
+  box-shadow:0 6px 16px rgba(200,30,80,.35); white-space:nowrap;
+}
+.wall-submit:hover { transform:translateY(-2px); box-shadow:0 10px 22px rgba(200,30,80,.45); }
+.wall-submit:active { transform:scale(.96); }
+.wall-notes {
+  display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
+  max-height:200px; overflow-y:auto; padding:4px 2px 8px;
+  scrollbar-width:thin; scrollbar-color:#f48fb1 transparent;
+}
+.wall-notes::-webkit-scrollbar { width:6px; }
+.wall-notes::-webkit-scrollbar-thumb { background:#f48fb1; border-radius:10px; }
+.note {
+  position:relative; background:linear-gradient(135deg,#fff9c4,#fff59d);
+  padding:10px 16px 12px; border-radius:4px 16px 4px 16px;
+  font-size:.9rem; color:#5d4037; letter-spacing:.5px; line-height:1.5;
+  box-shadow:0 4px 10px rgba(180,120,40,.2),0 0 0 1px rgba(255,255,255,.6) inset;
+  max-width:240px; word-break:break-word;
+  animation:noteAppear .5s cubic-bezier(.23,1,.32,1);
+  transform-origin:center; text-align:left;
+}
+.note:nth-child(3n) { transform:rotate(-1.5deg); }
+.note:nth-child(3n+1) { transform:rotate(1deg); }
+.note:nth-child(3n+2) { transform:rotate(-.5deg); }
+@keyframes noteAppear {
+  0% { opacity:0; transform:scale(.7) rotate(-4deg); }
+  100% { opacity:1; transform:scale(1) rotate(0deg); }
+}
+.note-delete {
+  position:absolute; top:-8px; right:-8px; width:22px; height:22px;
+  border-radius:50%; background:#ef5350; color:#fff; border:2px solid #fff;
+  font-size:.8rem; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity .2s, transform .2s;
+  box-shadow:0 2px 6px rgba(200,0,0,.3);
+}
+.note:hover .note-delete { opacity:1; }
+.note-delete:hover { transform:scale(1.15); }
+.wall-empty { font-size:.88rem; color:#c48a9e; letter-spacing:1px; padding:12px; }
+.share-row { margin-top:18px; display:flex; justify-content:center; transform:translateZ(14px); }
+.toast {
+  position:fixed; bottom:40px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:rgba(136,14,79,.92); color:#fff; padding:12px 28px;
+  border-radius:40px; font-size:.95rem; letter-spacing:2px;
+  opacity:0; pointer-events:none; transition:opacity .4s, transform .4s;
+  z-index:200; backdrop-filter:blur(8px);
+  box-shadow:0 10px 30px rgba(150,20,70,.4);
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+@media (max-width:520px) {
+  .card { padding:36px 22px 32px; border-radius:44px 18px 44px 18px; }
+  h1 { font-size:2.2rem; letter-spacing:4px; }
+  .icon { font-size:3.6rem; }
+  .poem { font-size:1.0rem; line-height:1.9rem; padding:16px 12px; }
+  .btn { font-size:.95rem; padding:11px 20px; }
+  .surprise { font-size:1.4rem; min-height:3rem; }
+  .sub { font-size:1rem; letter-spacing:2px; }
+  .quote-tag { font-size:.7rem; padding:1px 8px; }
+  .envelope { width:200px; height:140px; }
+  .envelope-flap { border-left-width:100px; border-right-width:100px; border-top-width:70px; }
+  .envelope-seal { font-size:1.7rem; }
+  .wall-input-row { flex-direction:column; }
+  .wall-submit { width:100%; }
+}
+@media (max-width:380px) {
+  .button-group { flex-direction:column; align-items:center; }
+  .btn { width:100%; justify-content:center; }
+}
+</style>
 </head>
 <body>
 
-    <!-- 动态星光粒子画布 -->
-    <canvas id="starCanvas"></canvas>
+<canvas id="starCanvas"></canvas>
 
-    <!-- 信封开场遮罩 -->
-    <div class="envelope-overlay" id="envelopeOverlay">
-        <div class="envelope" id="envelope" onclick="openEnvelope()">
-            <div class="envelope-flap"></div>
-            <div class="envelope-seal">💌</div>
-            <div class="envelope-hint">✨ 点击开启祝福 ✨</div>
-        </div>
+<div class="envelope-overlay" id="envelopeOverlay">
+  <div class="envelope" id="envelope" onclick="openEnvelope()">
+    <div class="envelope-flap"></div>
+    <div class="envelope-seal">💌</div>
+    <div class="envelope-hint">✨ 点击开启祝福 ✨</div>
+  </div>
+</div>
+
+<div id="petalsContainer"></div>
+
+<div class="card-scene" id="cardScene">
+  <div class="card" id="card">
+    <div class="icon">🌹</div>
+    <h1>教师节快乐</h1>
+    <div class="sub">—— 桃李满天下 · 春晖遍四方 ——</div>
+
+    <div class="poem">
+      “ 三尺讲台，三寸舌，三寸笔，三千桃李 ”
+      <span>—— 致敬每一位辛勤的园丁</span>
     </div>
 
-    <!-- 浮动花瓣容器 -->
-    <div id="petalsContainer"></div>
-
-    <!-- 3D 卡片场景 -->
-    <div class="card-scene" id="cardScene">
-        <div class="card" id="card">
-            <div class="icon">🌹</div>
-            <h1>教师节快乐</h1>
-            <div class="sub">—— 桃李满天下 · 春晖遍四方 ——</div>
-
-            <div class="poem">
-                “ 三尺讲台，三寸舌，三寸笔，三千桃李 ”
-                <span>—— 致敬每一位辛勤的园丁</span>
-            </div>
-
-            <!-- 按钮组：四个交互按钮 -->
-            <div class="button-group">
-                <button class="btn" onclick="showSurprise(0)">🌸 点击送祝福</button>
-                <button class="btn secondary" onclick="showSurprise(1)">📜 再颂师恩</button>
-                <button class="btn quote" onclick="showSurprise(2)">✨ 玄玄语录</button>
-            </div>
-
-            <!-- 惊喜消息区：显示文本，玄玄语录时会附带时间标签 -->
-            <div class="surprise" id="surpriseMessage">💐 老师，您辛苦了！</div>
-
-            <!-- 分享按钮 -->
-            <div class="share-row">
-                <button class="btn share" onclick="generateCardImage()">📸 生成贺卡图片</button>
-            </div>
-
-            <!-- ===== 感恩留言墙 ===== -->
-            <div class="message-wall">
-                <div class="wall-title">感 恩 留 言 墙</div>
-                <div class="wall-input-row">
-                    <input type="text" class="wall-input" id="wallInput" placeholder="写一句祝福，贴在墙上…" maxlength="60">
-                    <button class="wall-submit" onclick="addNote()">贴 上 去</button>
-                </div>
-                <div class="wall-notes" id="wallNotes">
-                    <!-- 便签动态插入 -->
-                </div>
-            </div>
-
-            <div class="footer-note">
-                <span>✨ 教诲如春风</span>
-                <span>✨ 师恩似海深</span>
-            </div>
-        </div>
+    <div class="button-group">
+      <button class="btn" onclick="showSurprise(0)">🌸 点击送祝福</button>
+      <button class="btn secondary" onclick="showSurprise(1)">📜 再颂师恩</button>
+      <button class="btn quote" onclick="showSurprise(2)">✨ 玄玄语录</button>
     </div>
 
-    <!-- 分享提示 toast -->
-    <div class="toast" id="toast">✅ 贺卡已生成，请查收下载</div>
+    <div class="surprise" id="surpriseMessage">💐 老师，您辛苦了！</div>
 
-    <script>
-        // ===== 动态星光粒子（canvas） =====
-        (function initStars() {
-            const canvas = document.getElementById('starCanvas');
-            const ctx = canvas.getContext('2d');
-            let stars = [];
-            let W, H;
+    <div class="share-row">
+      <button class="btn share" onclick="generateCardImage()">📸 生成贺卡图片</button>
+    </div>
 
-            function resize() {
-                W = canvas.width = window.innerWidth;
-                H = canvas.height = window.innerHeight;
-            }
+    <div class="message-wall">
+      <div class="wall-title">感 恩 留 言 墙</div>
+      <div class="wall-input-row">
+        <input type="text" class="wall-input" id="wallInput" placeholder="写一句祝福，贴在墙上…" maxlength="60">
+        <button class="wall-submit" onclick="addNote()">贴 上 去</button>
+      </div>
+      <div class="wall-notes" id="wallNotes"></div>
+    </div>
 
-            function createStars() {
-                stars = [];
-                const count = Math.min(90, Math.floor(W * H / 16000));
-                for (let i = 0; i < count; i++) {
-                    stars.push({
-                        x: Math.random() * W,
-                        y: Math.random() * H,
-                        r: 0.8 + Math.random() * 1.8,
-                        speed: 0.15 + Math.random() * 0.4,
-                        drift: (Math.random() - 0.5) * 0.3,
-                        alpha: 0.2 + Math.random() * 0.6,
-                        pulse: Math.random() * Math.PI * 2,
-                        pulseSpeed: 0.005 + Math.random() * 0.015,
-                        isGold: Math.random() > 0.35 // 部分金色，部分白色
-                    });
-                }
-            }
+    <div class="footer-note">
+      <span>✨ 教诲如春风</span>
+      <span>✨ 师恩似海深</span>
+    </div>
+  </div>
+</div>
 
-            function draw() {
-                ctx.clearRect(0, 0, W, H);
-                for (let s of stars) {
-                    s.pulse += s.pulseSpeed;
-                    s.y -= s.speed;
-                    s.x += s.drift + Math.sin(s.pulse) * 0.15;
+<div class="toast" id="toast">✅ 贺卡已生成，请查收下载</div>
 
-                    // 循环
-                    if (s.y < -10) {
-                        s.y = H + 10;
-                        s.x = Math.random() * W;
-                    }
-                    if (s.x < -10) s.x = W + 10;
-                    if (s.x > W + 10) s.x = -10;
+<script>
+/* ===== 星光粒子 ===== */
+(function initStars(){
+  const canvas = document.getElementById('starCanvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [], W, H;
+  function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function createStars(){
+    stars = [];
+    const count = Math.min(90, Math.floor(W * H / 16000));
+    for (let i=0;i<count;i++){
+      stars.push({
+        x:Math.random()*W, y:Math.random()*H,
+        r:0.8+Math.random()*1.8, speed:0.15+Math.random()*0.4,
+        drift:(Math.random()-0.5)*0.3, alpha:0.2+Math.random()*0.6,
+        pulse:Math.random()*Math.PI*2, pulseSpeed:0.005+Math.random()*0.015,
+        isGold:Math.random()>0.35
+      });
+    }
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for (let s of stars){
+      s.pulse += s.pulseSpeed;
+      s.y -= s.speed;
+      s.x += s.drift + Math.sin(s.pulse)*0.15;
+      if (s.y < -10){ s.y = H+10; s.x = Math.random()*W; }
+      if (s.x < -10) s.x = W+10;
+      if (s.x > W+10) s.x = -10;
+      const a = s.alpha * (0.65 + Math.sin(s.pulse)*0.35);
+      const color = s.isGold ? `rgba(255,215,130,${a})` : `rgba(255,240,250,${a*0.85})`;
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle = color;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = s.isGold ? 'rgba(255,200,100,0.6)' : 'rgba(255,220,240,0.5)';
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    requestAnimationFrame(draw);
+  }
+  resize(); createStars(); draw();
+  window.addEventListener('resize', ()=>{ resize(); createStars(); });
+})();
 
-                    const a = s.alpha * (0.65 + Math.sin(s.pulse) * 0.35);
-                    const color = s.isGold
-                        ? `rgba(255, 215, 130, ${a})`
-                        : `rgba(255, 240, 250, ${a * 0.85})`;
+/* ===== 信封开场 ===== */
+function openEnvelope(){
+  const envelope = document.getElementById('envelope');
+  const overlay = document.getElementById('envelopeOverlay');
+  const cardScene = document.getElementById('cardScene');
+  envelope.classList.add('open');
+  setTimeout(()=>{
+    overlay.classList.add('hide');
+    cardScene.classList.add('revealed');
+  }, 500);
+}
 
-                    ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                    ctx.fillStyle = color;
-                    ctx.shadowBlur = 8;
-                    ctx.shadowColor = s.isGold
-                        ? 'rgba(255, 200, 100, 0.6)'
-                        : 'rgba(255, 220, 240, 0.5)';
-                    ctx.fill();
-                }
-                ctx.shadowBlur = 0;
-                requestAnimationFrame(draw);
-            }
+/* ===== 花瓣 ===== */
+function createPetals(){
+  const container = document.getElementById('petalsContainer');
+  const emojis = ['🌸','🌺','🌷','🌹','🌻','🌸','💮','🏵️'];
+  const count = window.innerWidth < 600 ? 18 : 28;
+  for (let i=0;i<count;i++){
+    const petal = document.createElement('div');
+    petal.className = 'petal';
+    petal.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    petal.style.fontSize = (1.0+Math.random()*2.0)+'rem';
+    petal.style.left = Math.random()*98+'%';
+    petal.style.animationDuration = (9+Math.random()*16)+'s';
+    petal.style.animationDelay = (Math.random()*16)+'s';
+    petal.style.opacity = 0.2+Math.random()*0.5;
+    container.appendChild(petal);
+  }
+}
+createPetals();
 
-            resize();
-            createStars();
-            draw();
+/* ===== 惊喜文案 ===== */
+const messagesList = [
+  [
+    '💐 晓玄老师，您辛苦了！',
+    '🌟 老师 我想你了',
+    '📚 感谢您的谆谆教诲！',
+    '🌹 愿您永远健康快乐！',
+    '🏆 您是最美的园丁！',
+    '💖 师恩如山，永记心间！',
+    '🌸 桃李不言，下自成蹊。',
+    '📖 春风化雨，润物无声。'
+  ],
+  [
+    '“新竹高于旧竹枝，全凭老干为扶持。”',
+    '“令公桃李满天下，何用堂前更种花。”',
+    '“落红不是无情物，化作春泥更护花。”',
+    '“忽遇文殊开慧眼，他年应记老师心。”',
+    '“偶应非熊兆，尊为帝者师。”',
+    '“师者，所以传道授业解惑也。”'
+  ],
+  [
+    '愿你之后的每场梦都不会空',
+    '我的语速快吗？我普通话可是二级甲！（傲娇）',
+    '这天天的！',
+    'go out!',
+    '口无遮拦！'
+  ]
+];
 
-            window.addEventListener('resize', () => {
-                resize();
-                createStars();
-            });
-        })();
+function cardPulse(){
+  const card = document.getElementById('card');
+  card.style.transition = 'transform .1s';
+  card.style.transform = 'scale(.98) rotateX(1deg)';
+  setTimeout(()=>{ card.style.transform = ''; }, 140);
+}
 
-        // ===== 信封开场动画 =====
-        function openEnvelope() {
-            const envelope = document.getElementById('envelope');
-            const overlay = document.getElementById('envelopeOverlay');
-            const cardScene = document.getElementById('cardScene');
+function showSurprise(type = 0){
+  const el = document.getElementById('surpriseMessage');
+  let selectedArray, isQuote = false;
+  if (type === 2){ selectedArray = messagesList[2]; isQuote = true; }
+  else if (type === 1){ selectedArray = messagesList[1]; }
+  else { selectedArray = messagesList[0]; }
 
-            // 信封打开
-            envelope.classList.add('open');
+  let randomMsg = selectedArray[Math.floor(Math.random()*selectedArray.length)];
+  const currentRaw = el.textContent.replace(/（2016\.9-2018\.6）/g,'').trim();
+  if (selectedArray.length > 1 && randomMsg === currentRaw){
+    randomMsg = selectedArray[Math.floor(Math.random()*selectedArray.length)];
+  }
 
-            // 延迟关闭遮罩，让卡片滑出
-            setTimeout(() => {
-                overlay.classList.add('hide');
-                cardScene.classList.add('revealed');
-            }, 500);
-        }
+  if (isQuote){
+    el.innerHTML = randomMsg + ' <span class="quote-tag">2016.9-2018.6</span>';
+  } else {
+    el.textContent = randomMsg;
+  }
+  el.classList.add('show');
+  cardPulse();
 
-        // ===== 生成浮动花瓣，增强氛围 =====
-        function createPetals() {
-            const container = document.getElementById('petalsContainer');
-            const emojis = ['🌸', '🌺', '🌷', '🌹', '🌻', '🌸', '💮', '🏵️'];
-            const count = window.innerWidth < 600 ? 18 : 28;
+  const tempPetal = document.createElement('div');
+  tempPetal.className = 'petal';
+  tempPetal.textContent = ['🌸','🌺','🌼','💮','🏵️'][Math.floor(Math.random()*5)];
+  tempPetal.style.fontSize = (1.8+Math.random()*2)+'rem';
+  tempPetal.style.left = (20+Math.random()*60)+'%';
+  tempPetal.style.animationDuration = (4+Math.random()*4)+'s';
+  tempPetal.style.animationDelay = '0s';
+  tempPetal.style.opacity = '0.8';
+  tempPetal.style.zIndex = '30';
+  document.body.appendChild(tempPetal);
+  setTimeout(()=>{ tempPetal.remove(); }, 6000);
+}
 
-            for (let i = 0; i < count; i++) {
-                const petal = document.createElement('div');
-                petal.className = 'petal';
-                petal.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                const size = 1.0 + Math.random() * 2.0;
-                petal.style.fontSize = size + 'rem';
-                petal.style.left = Math.random() * 98 + '%';
-                petal.style.animationDuration = (9 + Math.random() * 16) + 's';
-                petal.style.animationDelay = (Math.random() * 16) + 's';
-                petal.style.opacity = 0.2 + Math.random() * 0.5;
-                petal.style.setProperty('--drift', (Math.random() * 40 - 20) + 'px');
-                container.appendChild(petal);
-            }
-        }
-        createPetals();
+document.getElementById('card').addEventListener('mouseleave', function(){
+  this.style.transition = 'transform .5s cubic-bezier(.23,1,.32,1), box-shadow .4s';
+  this.style.transform = '';
+});
 
-        // ===== 点击惊喜 =====
-        const xuanXuanQuotes = [
-            '愿你之后的每场梦都不会空',
-            '我的语速快吗？我普通话可是国家二级甲！（傲娇）',
-            '这天天的！',
-            'go out!',
-            '口无遮拦！'
-        ];
+/* ===== 感恩留言墙 ===== */
+const STORAGE_KEY = 'teacher_day_notes_v1';
 
-        const messagesList = [
-            [ // 第一组：祝福老师
-                '💐 晓玄老师，您辛苦了！',
-                '🌟 老师 我想你了',
-                '📚 感谢您的谆谆教诲！',
-                '🌹 愿您永远健康快乐！',
-                '🏆 您是最美的园丁！',
-                '💖 师恩如山，永记心间！',
-                '🌸 桃李不言，下自成蹊。',
-                '📖 春风化雨，润物无声。'
-            ],
-            [ // 第二组：诗词/名言
-                '“新竹高于旧竹枝，全凭老干为扶持。”',
-                '“令公桃李满天下，何用堂前更种花。”',
-                '“落红不是无情物，化作春泥更护花。”',
-                '“忽遇文殊开慧眼，他年应记老师心。”',
-                '“偶应非熊兆，尊为帝者师。”',
-                '“师者，所以传道授业解惑也。”'
-            ],
-            [ // 第三组：玄玄语录
-                '愿你之后的每场梦都不会空',
-                '我的语速快吗？我普通话可是二级甲！（傲娇）',
-                '这天天的！',
-                'go out!',
-                '口无遮拦！'
-            ]
-        ];
+function loadNotes(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveNotes(notes){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+}
+function renderNotes(){
+  const box = document.getElementById('wallNotes');
+  const notes = loadNotes();
+  box.innerHTML = '';
+  if (notes.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'wall-empty';
+    empty.textContent = '还没有留言，来写第一句祝福吧 ~';
+    box.appendChild(empty);
+    return;
+  }
+  notes.forEach((text, idx)=>{
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = text;
+    const del = document.createElement('button');
+    del.className = 'note-delete';
+    del.textContent = '×';
+    del.title = '删除';
+    del.onclick = ()=>{
+      const arr = loadNotes();
+      arr.splice(idx,1);
+      saveNotes(arr);
+      renderNotes();
+    };
+    note.appendChild(del);
+    box.appendChild(note);
+  });
+}
 
-        function cardPulse() {
-            const card = document.getElementById('card');
-            card.style.transition = 'transform 0.1s';
-            card.style.transform = 'scale(0.98) rotateX(1deg)';
-            setTimeout(() => {
-                card.style.transform = '';
-            }, 140);
-        }
+function addNote(){
+  const input = document.getElementById('wallInput');
+  const text = input.value.trim();
+  if (!text){
+    showToast('先写一句祝福吧 ~');
+    input.focus();
+    return;
+  }
+  const notes = loadNotes();
+  notes.push(text);
+  saveNotes(notes);
+  input.value = '';
+  renderNotes();
+  showToast('💌 祝福已贴上墙');
+}
+document.getElementById('wallInput').addEventListener('keydown', e=>{
+  if (e.key === 'Enter') addNote();
+});
+renderNotes();
 
-        function showSurprise(type = 0) {
-            const el = document.getElementById('surpriseMessage');
-            let selectedArray;
-            let isQuote = false;
+/* ===== 生成贺卡图片 ===== */
+function generateCardImage(){
+  const card = document.getElementById('card');
+  if (typeof html2canvas === 'undefined'){
+    showToast('图片库加载中，请稍后再试');
+    return;
+  }
+  showToast('⏳ 正在生成贺卡…');
+  html2canvas(card, {
+    backgroundColor: null,
+    scale: 2,
+    useCORS: true,
+    allowTaint: true
+  }).then(canvas=>{
+    const link = document.createElement('a');
+    link.download = '教师节贺卡_' + Date.now() + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('✅ 贺卡已生成，请查收下载');
+  }).catch(err=>{
+    console.error(err);
+    showToast('生成失败，请重试');
+  });
+}
 
-            if (type === 2) {
-                selectedArray = messagesList[2];
-                isQuote = true;
-            } else if (type === 1) {
-                selectedArray = messagesList[1];
-            } else {
-                selectedArray = messagesList[0];
-            }
-
-            let randomMsg = selectedArray[Math.floor(Math.random() * selectedArray.length)];
-
-            const currentRawText = el.textContent.replace(/（2016\.9-2018\.6）/g, '').trim();
-            if (selectedArray.length > 1 && randomMsg === currentRawText) {
-                randomMsg = selectedArray[Math.floor(Math.random() * selectedArray.length)];
-            }
-
-            let displayHtml = randomMsg;
-            if (isQuote) {
-                displayHtml = `${randomMsg} <span class="quote-tag">2016.9-2018.6</span>`;
-            }
-
-            if (isQuote) {
-                el.innerHTML = displayHtml;
-            } else {
-                el.textContent = randomMsg;
-            }
-
-            el.classList.add('show');
-            cardPulse();
-
-            // 额外花瓣飘落效果
-            const tempPetal = document.createElement('div');
-            tempPetal.className = 'petal';
-            tempPetal.textContent = ['🌸', '🌺', '🌼', '💮', '🏵️'][Math.floor(Math.random() * 5)];
-            tempPetal.style.fontSize = (1.8 + Math.random() * 2) + 'rem';
-            tempPetal.style.left = (20 + Math.random() * 60) + '%';
-            tempPetal.style.animationDuration = (4 + Math.random() * 4) + 's';
-            tempPetal.style.animationDelay = '0s';
-            tempPetal.style.opacity = '0.8';
-            tempPetal.style.zIndex = '30';
-            document.body.appendChild
+/* ===== Toast ===== */
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>
